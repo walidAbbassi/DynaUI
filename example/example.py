@@ -173,8 +173,8 @@ class Dialog(BaseMain):
         self.AddSeparator(Left)
         self.AddButtonBundle(Left, label="", tags=("A", "B", "C"), width=20, toggled=0, group="1")
         self.AddButtonBundle(Left, label="", tags=("A", "B", "C"), width=-1, toggled=1, group="2")
-        self.AddButtonBundle(Left, label="123", tags=("A", "B", "C"), width=20, toggled=2, group="3")
-        self.AddButtonBundle(Left, label="123", tags=("A", "B", "C"), width=-1, toggled=0, group="4")
+        self.AddButtonBundle(Left, label="123", tags=("A", "B", "C", "D", "E"), width=20, rows=2, toggled=2, group="3")
+        self.AddButtonBundle(Left, label="123", tags=("A", "B", "C", "D", "E", "F"), width=-1, rows=3, toggled=0, group="4")
 
         self.AddStaticText(Middle, "STA", "ssss", width=-1)
         self.AddLineCtrl(Middle, "TEXT", width=100)

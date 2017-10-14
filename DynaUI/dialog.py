@@ -59,17 +59,24 @@ class BaseMain(BaseControl):
             sizer.Add(subSizer, width == -1, wx.ALL, self.MARGIN)
         return button
 
-    def AddButtonBundle(self, sizer, label="", tags=(), width=80, toggled=0, group="", onClick=None, **kwargs):
-        subSizer = wx.BoxSizer(wx.HORIZONTAL)
+    def AddButtonBundle(self, sizer, label="", tags=(), width=80, rows=1, toggled=0, group="", onClick=None, **kwargs):
+        bPerRow = (len(tags) + rows - 1) // rows
+        subSizers = [wx.BoxSizer(wx.HORIZONTAL) for i in range(rows)]
         if label:
             name = wx.StaticText(self, label=label, size=wx.Size(self.LABEL_WIDTH, -1), style=wx.ST_ELLIPSIZE_END)
-            subSizer.Add(name, 0, wx.ALIGN_CENTER)
-            subSizer.Add(self.MARGIN * 2, self.MARGIN)
+            subSizers[0].Add(name, 0, wx.ALIGN_CENTER)
+            subSizers[0].Add(self.MARGIN * 2, self.MARGIN)
+            for s in subSizers[1:]:
+                s.Add(self.LABEL_WIDTH, -1, 0, wx.ALIGN_CENTER)
+                s.Add(self.MARGIN * 2, self.MARGIN)
         buttons = []
         for index, tag in enumerate(tags):
             button = UI.ButtonBundle(self, size=wx.Size(width, self.LINE_HEIGHT), tag=tag, func=onClick, edge="L", toggle=index == toggled, group=group, **kwargs)
-            subSizer.Add(button, width == -1)
+            subSizers[index // bPerRow].Add(button, width == -1)
             buttons.append(button)
+        subSizer = wx.BoxSizer(wx.VERTICAL)
+        for s in subSizers:
+            subSizer.Add(s, 1, wx.EXPAND)
         if sizer.GetOrientation() == wx.VERTICAL:
             sizer.Add(subSizer, 0, wx.EXPAND | wx.ALL, self.MARGIN)
         else:
@@ -89,12 +96,14 @@ class BaseMain(BaseControl):
         sizer.Add(subSizer, 0, wx.EXPAND | wx.ALL, self.MARGIN)
         return text
 
-    def AddLineCtrl(self, sizer, label="", value="", width=-1, style=0, onInput=None, hint=""):
+    def AddLineCtrl(self, sizer, label="", value="", width=-1, style=0, onInput=None, hint="", font=None):
         subSizer = wx.BoxSizer(wx.HORIZONTAL)
         if hint:
             text = UI.TextWithHint(self, hint=hint, value=value, size=wx.Size(width, self.LINE_HEIGHT), style=style | wx.BORDER_SIMPLE)
         else:
             text = UI.Text(self, value=value, size=wx.Size(width, self.LINE_HEIGHT), style=style | wx.BORDER_SIMPLE)
+        if font is not None:
+            text.SetFont(self.R["FONT_" + font] if isinstance(font, str) else font)
         if label:
             name = wx.StaticText(self, label=label, size=wx.Size(self.LABEL_WIDTH, -1), style=wx.ST_ELLIPSIZE_END)
             name.Bind(wx.EVT_LEFT_DOWN, lambda evt: (text.SetFocus(), text.SelectAll()))
@@ -109,8 +118,10 @@ class BaseMain(BaseControl):
             sizer.Add(subSizer, width == -1, wx.ALL, self.MARGIN)
         return text
 
-    def AddTextCtrl(self, sizer, label="", value="", width=-1, height=-1, style=0, inline=True, onInput=None):
+    def AddTextCtrl(self, sizer, label="", value="", width=-1, height=-1, style=0, inline=True, onInput=None, font=None):
         text = UI.Text(self, value=value, size=wx.Size(width, height), style=style | wx.TE_MULTILINE | wx.BORDER_SIMPLE)
+        if font is not None:
+            text.SetFont(self.R["FONT_" + font] if isinstance(font, str) else font)
         if onInput:
             text.Bind(wx.EVT_TEXT, onInput)
         if label:
