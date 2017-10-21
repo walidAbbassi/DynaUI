@@ -118,8 +118,11 @@ class BaseMain(BaseControl):
             sizer.Add(subSizer, width == -1, wx.ALL, self.MARGIN)
         return text
 
-    def AddTextCtrl(self, sizer, label="", value="", width=-1, height=-1, style=0, inline=True, onInput=None, font=None):
-        text = UI.Text(self, value=value, size=wx.Size(width, height), style=style | wx.TE_MULTILINE | wx.BORDER_SIMPLE)
+    def AddTextCtrl(self, sizer, label="", value="", width=-1, height=-1, style=0, inline=True, onInput=None, hint="", font=None):
+        if hint:
+            text = UI.TextWithHint(self, hint=hint, value=value, size=wx.Size(width, height), style=style | wx.TE_MULTILINE | wx.BORDER_SIMPLE)
+        else:
+            text = UI.Text(self, value=value, size=wx.Size(width, height), style=style | wx.TE_MULTILINE | wx.BORDER_SIMPLE)
         if font is not None:
             text.SetFont(self.R["FONT_" + font] if isinstance(font, str) else font)
         if onInput:

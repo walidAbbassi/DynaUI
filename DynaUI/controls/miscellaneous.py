@@ -29,7 +29,7 @@ class Text(wx.TextCtrl):
 
 
 # =================================================== Miscellaneous ====================================================
-class TextWithHint(wx.TextCtrl):  # Only GetValue is reimplemented!
+class TextWithHint(wx.TextCtrl):  # Only GetValue/SetValue/AppendText are reimplemented!
     def __init__(self, parent, hint="", style=wx.BORDER_SIMPLE, *args, **kwargs):
         super().__init__(parent, *args, **kwargs, style=style)
         self.hint = hint
@@ -47,6 +47,16 @@ class TextWithHint(wx.TextCtrl):  # Only GetValue is reimplemented!
         else:
             self.showMessage = False
             self.SetForegroundColour(self.R["COLOR_FG_L"])
+
+    def AppendText(self, text):
+        if self.showMessage:
+            self.SetForegroundColour(self.R["COLOR_FG_L"])
+        super().AppendText(text)
+
+    def SetValue(self, value):
+        if self.showMessage:
+            self.SetForegroundColour(self.R["COLOR_FG_L"])
+        super().SetValue(value)
 
     def GetValue(self):
         if self.showMessage:
@@ -297,5 +307,3 @@ class SwitchingText(BaseControl):
             dc.DrawText(self.Values[1][0], x1, y1)
             dc.SetTextForeground(c1)
             dc.DrawText(self.Values[0][0], x0, y0)
-
-
