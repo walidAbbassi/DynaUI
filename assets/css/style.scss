@@ -3,5 +3,8 @@
 
 @import "{{ site.theme }}";
 #main_content {
-    max-width: 1280px;
+    max-width: 960px;
+}
+img {
+    max-width: 960px;
 }
