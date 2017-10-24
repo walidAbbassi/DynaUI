@@ -129,10 +129,10 @@ class Resource(BaseDict):
             self["BITMAPFONT_%s" % font] = self.GetBitmapFont(font, "#ffffff")
 
     def SetMainFont(self, point, fontface):
-        self["FONT_N"] = wx.Font(point, 70, 90, 90, False, fontface)
-        self["FONT_I"] = wx.Font(point, 70, 90, wx.FONTWEIGHT_BOLD, False, fontface)
-        self["FONT_H"] = wx.Font(point, 70, wx.FONTSTYLE_ITALIC, 90, False, fontface)
-        self["FONT_J"] = wx.Font(point, 70, wx.FONTSTYLE_ITALIC, wx.FONTWEIGHT_BOLD, False, fontface)
+        self["FONT_N"] = wx.Font(point, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL, False, fontface)
+        self["FONT_I"] = wx.Font(point, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_BOLD, False, fontface)
+        self["FONT_H"] = wx.Font(point, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_ITALIC, wx.FONTWEIGHT_NORMAL, False, fontface)
+        self["FONT_J"] = wx.Font(point, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_ITALIC, wx.FONTWEIGHT_BOLD, False, fontface)
 
     def GetColorSet(self, bg, fg):
         return {"00": AlphaBlend(bg, fg, 0),

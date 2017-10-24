@@ -1,10 +1,7 @@
 # -*- coding: utf-8 -*-
 
 
-import sys
 import wx
-import win32gui
-import win32api
 
 __all__ = [
     "DropShadow",
@@ -22,14 +19,25 @@ __all__ = [
 ]
 
 # ----------------------------------------------------------
-if sys.getwindowsversion().major > 6 or (sys.getwindowsversion().major == 6 and sys.getwindowsversion().minor > 1):
-    _rounded = 0
+if wx.Platform == "__WXMSW__":
+    try:
+        import sys
+        import win32gui
+        import win32api
+
+        if sys.getwindowsversion().major > 6 or (sys.getwindowsversion().major == 6 and sys.getwindowsversion().minor > 1):
+            _rounded = 0
+        else:
+            _rounded = 2
+        _importFail = False
+    except ImportError:
+        _importFail = True
 else:
-    _rounded = 2
+    _importFail = True
 
 
 def DropShadow(w, drop=True):
-    if wx.Platform != "__WXMSW__":
+    if wx.Platform != "__WXMSW__" or _importFail:
         return
     hwnd = w.GetHandle()
     size = w.GetSize()
