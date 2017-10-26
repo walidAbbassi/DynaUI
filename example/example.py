@@ -59,6 +59,7 @@ class ExampleUI(wx.Frame):
         Sizer.Add(PickerFont(self.Main, size=SIZE_NORMAL), SF_000A4)
         Sizer.Add(PickerDirection(self.Main, size=SIZE_NORMAL), SF_000A4)
         Sizer.Add(PickerNumber(self.Main, size=SIZE_NORMAL), SF_000A4)
+        Sizer.Add(PickerValue(self.Main, size=SIZE_NORMAL, value="2", choices=[str(i) for i in range(10)]), SF_000A4)
         self.AddSeparator(Sizer)
         b1 = Button(self.Main, size=SIZE_NORMAL, tag=("Click", "B", 0, -2), pic=(self.R["UI_IMAGE2"], "T", 0, 2), func=lambda: (b2.Enable(not b2.IsEnabled()), b2.ReDraw()))
         b2 = Button(self.Main, size=SIZE_NORMAL, tag=("Click", "LT", 2, 2), pic=(self.R["UI_IMAGE2"], "RB", -2, -2), func=lambda: (b1.Enable(not b1.IsEnabled()), b1.ReDraw()))

@@ -205,10 +205,6 @@ class Scrolled(BaseControl):
     def HandleMouse(self, evt):
         evtType = evt.GetEventType()
         evtPos = evt.GetPosition()
-        if evtType in (wx.wxEVT_LEFT_DOWN, wx.wxEVT_MIDDLE_DOWN, wx.wxEVT_RIGHT_DOWN):
-            if not self.HasCapture(): self.CaptureMouse()
-        elif evtType in (wx.wxEVT_LEFT_UP, wx.wxEVT_MIDDLE_UP, wx.wxEVT_RIGHT_UP):
-            if self.HasCapture(): self.ReleaseMouse()
         handled = False
         for sb in self.ScrollBar:
             if sb and sb.Show:

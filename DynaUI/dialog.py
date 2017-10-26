@@ -8,7 +8,7 @@ from . import variable as Va
 from . import utility as Ut
 from . import controls as UI
 
-__all__ = ["BaseMain", "BaseHead", "BaseGrip", "BaseDialog"]
+__all__ = ["BaseMain", "BaseHead", "BaseGrip", "BaseDialog", "BaseMiniDialog"]
 
 
 # ====================================================== BaseMain ======================================================
@@ -460,3 +460,44 @@ class BaseDialog(wx.MiniFrame):
 
     def OnClose(self):
         self.Play("FADEOUT")
+
+
+# =================================================== BaseMiniDialog ===================================================
+class BaseMiniDialog(wx.MiniFrame):
+    def __init__(self, parent, pos=wx.DefaultPosition, size=wx.DefaultSize, main=None, **kwargs):
+        super().__init__(parent=parent, pos=pos, size=size, style=wx.BORDER_NONE | wx.STAY_ON_TOP)
+        self.R = parent.R
+        self.S = parent.S
+        self.L = parent.L
+
+        self.Main = main(self, **kwargs)
+        FrameSizer = wx.BoxSizer(wx.VERTICAL)
+        FrameSizer.Add(self.Main, 1, wx.EXPAND)
+        self.SetSizer(FrameSizer)
+        self.Layout()
+        self.Main.SetFocus()
+
+        self.Bind(wx.EVT_TIMER, lambda evt: Ab.Do(evt.GetTimer().func))
+        self.Bind(wx.EVT_WINDOW_DESTROY, self.OnDestroy)
+        self.Timers = {}
+        self.Animations = {}
+        self.NewAnimation("FADEIN", 16, self.SetTransparent, range(55, 256, 50), False, onStart=self.Show)
+        self.NewAnimation("FADEOUT", 16, self.SetTransparent, range(200, -1, -50), False, onStop=self.Destroy)
+        self.SetTransparent(5)
+
+        Ut.DropShadow(self)
+
+    def NewAnimation(self, name, interval, variable, sequence=None, resource=True, repeat=0, onUpdate=None, onStart=None, onStop=None, onRepeat=None):
+        self.Timers[name] = wx.Timer(self)
+        self.Animations[name] = Animation(self, self.Timers[name], interval, variable, sequence, resource, repeat, self.Refresh if onUpdate is None else onUpdate, onStart, onStop, onRepeat)
+        self.Timers[name].func = self.Animations[name].Update
+
+    def Play(self, name, sequence=None, repeat=None):
+        for a in self.Animations:
+            self.Animations[a].Stop()
+        self.Animations[name].Play(sequence, repeat)
+
+    def OnDestroy(self, evt):
+        for timer in self.Timers:
+            self.Timers[timer].Stop()
+        evt.Skip()
