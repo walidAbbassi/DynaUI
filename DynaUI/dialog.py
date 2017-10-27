@@ -83,6 +83,20 @@ class BaseMain(BaseControl):
             sizer.Add(subSizer, width == -1, wx.ALL, self.MARGIN)
         return UI.Bundled(buttons)
 
+    def AddPickerValue(self, sizer, label="", choices=(), selected=-1, width=80, **kwargs):
+        subSizer = wx.BoxSizer(wx.HORIZONTAL)
+        if label:
+            name = wx.StaticText(self, label=label, size=wx.Size(self.LABEL_WIDTH, -1), style=wx.ST_ELLIPSIZE_END)
+            subSizer.Add(name, 0, wx.ALIGN_CENTER)
+            subSizer.Add(self.MARGIN * 2, self.MARGIN)
+        picker = UI.PickerValue(self, size=wx.Size(width, self.LINE_HEIGHT), choices=choices, selected=selected, edge="L", **kwargs)
+        subSizer.Add(picker, width == -1)
+        if sizer.GetOrientation() == wx.VERTICAL:
+            sizer.Add(subSizer, 0, wx.EXPAND | wx.ALL, self.MARGIN)
+        else:
+            sizer.Add(subSizer, width == -1, wx.ALL, self.MARGIN)
+        return picker
+
     # --------------------------
     def AddStaticText(self, sizer, label="", value="", width=-1):
         subSizer = wx.BoxSizer(wx.HORIZONTAL)
@@ -326,7 +340,7 @@ class BaseGrip(BaseControl):
             self.lastFrameSize = None
         elif evtType == wx.wxEVT_MOTION and self.leftDown:
             if not self.sizeRect:
-                self.sizeRect = wx.MiniFrame(self, pos=self.Frame.GetPosition(), size=self.lastFrameSize, style=wx.BORDER_NONE | wx.STAY_ON_TOP | wx.FRAME_FLOAT_ON_PARENT)
+                self.sizeRect = wx.MiniFrame(self, pos=self.Frame.GetPosition(), size=self.lastFrameSize, style=wx.BORDER_NONE | wx.FRAME_FLOAT_ON_PARENT)
                 self.sizeRect.SetBackgroundColour(self.R["COLOR_DLG_SIZING"])
                 self.sizeRect.SetTransparent(0)
                 self.sizeRect.Show()
@@ -464,11 +478,14 @@ class BaseDialog(wx.MiniFrame):
 
 # =================================================== BaseMiniDialog ===================================================
 class BaseMiniDialog(wx.MiniFrame):
-    def __init__(self, parent, pos=wx.DefaultPosition, size=wx.DefaultSize, main=None, **kwargs):
-        super().__init__(parent=parent, pos=pos, size=size, style=wx.BORDER_NONE | wx.STAY_ON_TOP)
+    def __init__(self, parent, pos=wx.DefaultPosition, size=wx.DefaultSize, font="N", bg="L", fg="L", main=None, **kwargs):
+        super().__init__(parent=parent, pos=pos, size=size, style=wx.BORDER_NONE)
         self.R = parent.R
         self.S = parent.S
         self.L = parent.L
+        self.SetFont(self.R["FONT_" + font] if isinstance(font, str) else font)
+        self.SetBackgroundColour(self.R["COLOR_BG_" + bg] if isinstance(bg, str) else bg)
+        self.SetForegroundColour(self.R["COLOR_FG_" + fg] if isinstance(fg, str) else fg)
 
         self.Main = main(self, **kwargs)
         FrameSizer = wx.BoxSizer(wx.VERTICAL)
@@ -477,6 +494,7 @@ class BaseMiniDialog(wx.MiniFrame):
         self.Layout()
         self.Main.SetFocus()
 
+        self.Bind(wx.EVT_SIZE, self.OnSize)
         self.Bind(wx.EVT_TIMER, lambda evt: Ab.Do(evt.GetTimer().func))
         self.Bind(wx.EVT_WINDOW_DESTROY, self.OnDestroy)
         self.Timers = {}
@@ -501,3 +519,8 @@ class BaseMiniDialog(wx.MiniFrame):
         for timer in self.Timers:
             self.Timers[timer].Stop()
         evt.Skip()
+
+    def OnSize(self, evt):
+        evt.Skip()
+        self.Layout()
+        Ut.DropShadow(self)

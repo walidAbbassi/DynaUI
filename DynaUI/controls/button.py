@@ -596,33 +596,43 @@ class PickerNumber(Button):  # TODO Wheel
 
 class PickerValue(ToolNormal):
     def __init__(self, parent, pos=wx.DefaultPosition, size=wx.DefaultSize, style=0,
-                 associate=None, value=None, choices=(),
+                 associate=None, selected=-1, choices=(),
                  tag="", pics=None,
                  font=None, res="D", bg="D", fg="L", edge="D", async=False, fpsLimit=0):
         super().__init__(parent=parent, pos=pos, size=size, style=style, showTag=True, tag=tag or ("", "L", 2), pics=pics or (parent.R["AP_TRIANGLE_D"], "R"), func=self.OnButton,
                          font=font, res=res, bg=bg, fg=fg, edge=edge, async=async, fpsLimit=fpsLimit)
+        self.edge = edge
         self.Associate = associate
         self.AutoLabel = self.Tag == ""
-        self.value = value
-        if value is not None and self.AutoLabel:
-            self.SetTag(value)
+        self.selected = selected
         self.choices = choices
+        if selected != -1 and self.AutoLabel:
+            self.SetTag(self.choices[self.selected])
 
     def OnButton(self):
-        d = Di.BaseMiniDialog(self, pos=self.GetScreenPosition() + (0, self.GetSize()[1] - 1), main=ListCtrl, data=[(i,) for i in self.choices], width=(-1,))
-        d.Main.SetSelection(-1 if self.value is None else self.choices.index(self.value))
+        size = wx.Size(self.GetSize()[0], min(400, (max(self.GetFont().GetPixelSize()[1], Ut.GetFontHeight(self)) + 4) * len(self.choices) + 2))
+        d = Di.BaseMiniDialog(self, pos=self.GetScreenPosition() + (0, self.GetSize()[1] - 1), size=size, main=ListCtrl, data=[(i,) for i in self.choices], width=(-1,), edge=self.edge)
+        d.Main.SetSelection(self.selected)
         d.Main.Bind(wx.EVT_KILL_FOCUS, lambda evt: d.Play("FADEOUT"))
-        d.Main.OnSelection = lambda: (self.SetValue(d.Main.GetStringSelection()), d.Play("FADEOUT"))
-        d.SetSize(wx.Size(self.GetSize()[0], d.Main.ASize[1] + 12))
+        d.Main.OnSelection = lambda: (self.SetSelection(d.Main.GetSelection()), d.Play("FADEOUT"))
         d.Play("FADEIN")
 
-    def SetValue(self, value):
-        self.value = value
+    def GetSelection(self):
+        return self.selected
+
+    def SetSelection(self, selected):
+        self.selected = selected
         if self.Associate:
-            self.Associate(value)
+            self.Associate(self.choices[self.selected])
         if self.AutoLabel:
-            self.SetTag(value)
+            self.SetTag(self.choices[self.selected])
         self.ReDraw()
+
+    def GetValue(self):
+        return self.choices[self.selected]
+
+    def SetValue(self, value):
+        self.SetSelection(self.choices.index(value))
 
 
 # Misc Buttons
