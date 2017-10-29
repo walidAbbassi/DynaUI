@@ -64,7 +64,7 @@ class Resource(BaseDict):
             "COLOR_ACTIVE"       : "#2675b2",
             "COLOR_INACTIVE"     : "#80808080",
 
-            "COLOR_DLG_SIZING"   : "#00c0ff",
+            "COLOR_SIZING"       : "#00c0ff",
             "COLOR_DLG_HEAD_FG_I": "#202020",
             "COLOR_DLG_HEAD_FG_O": "#ffffff",
             "COLOR_DLG_HEAD_BG_I": "#808080",

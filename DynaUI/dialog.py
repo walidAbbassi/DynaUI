@@ -341,7 +341,7 @@ class BaseGrip(BaseControl):
         elif evtType == wx.wxEVT_MOTION and self.leftDown:
             if not self.sizeRect:
                 self.sizeRect = wx.MiniFrame(self, pos=self.Frame.GetPosition(), size=self.lastFrameSize, style=wx.BORDER_NONE | wx.FRAME_FLOAT_ON_PARENT)
-                self.sizeRect.SetBackgroundColour(self.R["COLOR_DLG_SIZING"])
+                self.sizeRect.SetBackgroundColour(self.R["COLOR_SIZING"])
                 self.sizeRect.SetTransparent(0)
                 self.sizeRect.Show()
                 self.Play("FADEIN")

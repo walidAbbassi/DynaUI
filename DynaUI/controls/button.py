@@ -654,7 +654,7 @@ class Hider(ToolNormal):
 
 
 class Sash(Button):
-    def __init__(self, parent, target, direction="L", vRange=(150, 600), func=None, font="I", res="L", bg="L", fg="D", edge=None, async=False, fpsLimit=0):
+    def __init__(self, parent, target, direction="L", vRange=(150, 600), func=None, font="I", res="L", bg="L", fg="D", edge=None):
         self.orientation = "H" if direction in "LR" else "V"
         if self.orientation == "H":
             size = wx.Size(4, -1)
@@ -666,12 +666,14 @@ class Sash(Button):
             tag = "--"
             self.dimension = 1
             self.cursor = parent.R["CURSOR_SASH_V"]
-        super().__init__(parent=parent, size=size, tag=tag, func=parent.Layout if func is None else func, font=font, res=res, bg=bg, fg=fg, edge=edge, async=async, fpsLimit=fpsLimit)
+        super().__init__(parent=parent, size=size, tag=tag, func=parent.Layout if func is None else func, font=font, res=res, bg=bg, fg=fg, edge=edge)
         self.Bind(wx.EVT_MOUSE_EVENTS, self.OnMouse)
         self.Target = target
         self.multiplier = {"L": 1, "R": -1, "T": 1, "B": -1}[direction]
         self.leftPos = None
         self.leftDown = False
+        self.sizeRect = None
+        self.sizeNew = None
         clipMin = vRange[0] >= 0
         clipMax = vRange[1] >= 0
 
@@ -684,6 +686,15 @@ class Sash(Button):
 
         self.Clipped = Clipped
 
+    def CloseRect(self):
+        if self.sizeRect is not None:
+            self.sizeRect.Destroy()
+            self.sizeRect = None
+
+    def SetRectAlpha(self, t):
+        if self.sizeRect is not None:
+            self.sizeRect.SetTransparent(t)
+
     def OnMouse(self, evt):
         evtType = evt.GetEventType()
         evtPos = evt.GetPosition()
@@ -691,23 +702,43 @@ class Sash(Button):
             if not self.HasCapture(): self.CaptureMouse()
             self.leftPos = evtPos[self.dimension]
             self.leftDown = True
-            self.SetCursor(self.cursor)
         elif evtType == wx.wxEVT_LEFT_UP:
             if self.HasCapture(): self.ReleaseMouse()
             self.leftPos = None
             self.leftDown = False
             self.SetCursor(self.R["CURSOR_NORMAL"])
+            if self.sizeRect:
+                self.Target.SetInitialSize(self.sizeNew)
+                self.Target.GetParent().Layout()
+                self.CloseRect()
+            self.Brush = self.Resources["00"]
+            self.ReDraw()
         elif evtType == wx.wxEVT_MOTION and self.leftDown:
-            delta = (evtPos[self.dimension] - self.leftPos) * self.multiplier
-            if abs(delta) > 10:
-                length = self.Clipped(self.Target.GetSize()[self.dimension] + delta)
-                self.Target.SetInitialSize(wx.Size(length, -1) if self.orientation == "H" else wx.Size(-1, length))
-                Ab.Do(self.Func)
+            if not self.sizeRect:
+                self.sizeRect = wx.MiniFrame(self, pos=self.GetScreenPosition(), size=self.GetSize(), style=wx.BORDER_NONE | wx.FRAME_FLOAT_ON_PARENT)
+                self.sizeRect.SetBackgroundColour(self.R["COLOR_SIZING"])
+                self.sizeRect.SetTransparent(192)
+                self.sizeRect.Show()
+            length = self.Clipped(self.Target.GetSize()[self.dimension] + (evtPos[self.dimension] - self.leftPos) * self.multiplier)
+            change = (length - self.Target.GetSize()[self.dimension]) * self.multiplier
+            if self.orientation == "H":
+                self.sizeNew = wx.Size(length, -1)
+                self.sizeRect.SetPosition(self.GetScreenPosition() + [change, 0])
+            else:
+                self.sizeNew = wx.Size(-1, length)
+                self.sizeRect.SetPosition(self.GetScreenPosition() + [0, change])
+            Ab.Do(self.Func)
+        elif evtType == wx.wxEVT_ENTER_WINDOW:
+            self.SetCursor(self.cursor)
+        elif evtType == wx.wxEVT_LEAVE_WINDOW and not self.leftDown:
+            self.SetCursor(self.R["CURSOR_NORMAL"])
         evt.Skip()
 
     def OnCaptureLost(self, evt):
         self.leftPos = None
         self.leftDown = False
+        self.sizeNew = None
+        self.CloseRect()
         self.SetCursor(self.R["CURSOR_NORMAL"])
 
 
