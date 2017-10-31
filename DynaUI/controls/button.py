@@ -709,8 +709,8 @@ class Sash(Button):
             self.SetCursor(self.R["CURSOR_NORMAL"])
             if self.sizeRect:
                 self.Target.SetInitialSize(self.sizeNew)
-                self.Target.GetParent().Layout()
                 self.CloseRect()
+                Ab.Do(self.Func)
             self.Brush = self.Resources["00"]
             self.ReDraw()
         elif evtType == wx.wxEVT_MOTION and self.leftDown:
@@ -727,7 +727,6 @@ class Sash(Button):
             else:
                 self.sizeNew = wx.Size(-1, length)
                 self.sizeRect.SetPosition(self.GetScreenPosition() + [0, change])
-            Ab.Do(self.Func)
         elif evtType == wx.wxEVT_ENTER_WINDOW:
             self.SetCursor(self.cursor)
         elif evtType == wx.wxEVT_LEAVE_WINDOW and not self.leftDown:

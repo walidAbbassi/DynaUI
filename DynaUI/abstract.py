@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-
+import os
 import json
 
 __all__ = ["Singleton", "BaseDict", "Do", "DoNothing"]
@@ -36,6 +36,9 @@ class BaseDict(object):
             return item
 
     def Load(self, filename):
+        if not os.path.exists(filename):
+            with open(filename, "wb") as f:
+                f.write(b"\x7b\x7d")
         with open(filename, "r", encoding="utf-8") as f:
             for key, value in json.load(f).items():
                 if key in self.dict:
