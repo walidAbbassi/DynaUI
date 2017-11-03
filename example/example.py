@@ -131,6 +131,15 @@ class ExampleUI(wx.Frame):
         Sizer.Add(iv, SF_410A4)
         MainSizer.Add(Sizer, 1, wx.EXPAND)
 
+        MainSizer.Add(SectionHead(self.Main, orientation=wx.HORIZONTAL, label="------- ArtProvider --------"), SF_010A4)
+        Sizer = wx.WrapSizer()
+        for key in self.R:
+            if key.startswith("AP_"):
+                t = ToolNormal(self.Main, size=SIZE_SQUARE, pics=self.R[key], edge="D")
+                t.SetTip(self.Info.SetStatus, key)
+                Sizer.Add(t, SF_000A4)
+        MainSizer.Add(Sizer, 0, wx.EXPAND)
+
         # ==================================================
         MiddleSizer = wx.BoxSizer(wx.HORIZONTAL)
         MiddleSizer.Add(self.VTool, 0, wx.EXPAND)

@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 
-
+import os
+import time
+import hashlib
 import wx
 
 __all__ = [
@@ -13,6 +15,8 @@ __all__ = [
     "GetTextExtent",
     "GetMultiLineTextExtent",
     "EnsureWindowInScreen",
+    "CreateRandomDirectory",
+    "FindOrCreateDirectory",
     "ShowSaveFileDialog",
     "ShowOpenFileDialog",
     "ShowSimpleMessageDialog",
@@ -120,6 +124,25 @@ def EnsureWindowInScreen(pos, size, snap=0):
     if pos[1] < snap: pos[1] = 0
     if pos[0] + size[0] > sW - snap: pos[0] = sW - size[0]
     return pos
+
+
+def CreateRandomDirectory(where):
+    while True:
+        path = os.path.join(where, hashlib.md5(str(time.time()).encode("utf-8")).hexdigest())
+        if not os.path.exists(path):
+            break
+    os.makedirs(path)
+    return path
+
+
+def FindOrCreateDirectory(path):
+    if os.path.exists(path):
+        return True
+    try:
+        os.makedirs(path)
+        return True
+    except Exception:
+        return False
 
 
 # ----------------------------------------------------------

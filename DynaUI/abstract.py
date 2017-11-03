@@ -26,6 +26,9 @@ class BaseDict(object):
     def __getitem__(self, key):
         return self.dict[key]
 
+    def __iter__(self):
+        return self.dict.__iter__()
+
     def get(self, item):
         return self.dict.get(item)
 

@@ -234,8 +234,8 @@ class BaseHead(UI.Button):
         super().__init__(parent, size=wx.Size(-1, Va.SETTINGS["DLG_HEAD"]), tag=(parent.GetTitle(), "L", 7, 0), fg=parent.R["COLOR_DLG_HEAD_FG"]["00"], **kwargs)
         self.Frame = parent
         self.Bind(wx.EVT_MOUSE_EVENTS, self.OnMouse)
-        self.NewAnimation("ENTER", 10, self.SetResource, ("FF", "C0", "80", "40", "00"), False, onStop=(self.ChangeResources, "BRUSH_DLG_SET_O"))
-        self.NewAnimation("LEAVE", 10, self.SetResource, ("00", "40", "80", "C0", "FF"), False, onStart=(self.ChangeResources, "BRUSH_DLG_SET_I"))
+        self.NewAnimation("ENTER", 10, self.SetResource, ("FF", "C0", "80", "40", "00"), False, onStop=(self.ChangeResources, "BRUSH_DLG_SET_I"))
+        self.NewAnimation("LEAVE", 10, self.SetResource, ("00", "40", "80", "C0", "FF"), False, onStart=(self.ChangeResources, "BRUSH_DLG_SET_O"))
         self.lastMousePos = None
         self.lastFramePos = None
         self.SizerFlags = wx.SizerFlags().Center()

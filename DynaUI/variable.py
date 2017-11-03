@@ -22,23 +22,21 @@ SETTINGS = {
 class Locale(BaseDict):
     DEFAULT = {}
 
-    def __init__(self, **kwargs):
+    def __init__(self, fp=None):
         super().__init__()
         self.dict = self.DEFAULT
-        for key in kwargs:
-            if key in self.dict:
-                self.dict[key] = kwargs[key]
+        if fp is not None:
+            self.Load(fp)
 
 
 class Setting(BaseDict):
     DEFAULT = {}
 
-    def __init__(self, **kwargs):
+    def __init__(self, fp=None):
         super().__init__()
         self.dict = self.DEFAULT
-        for key in kwargs:
-            if key in self.dict:
-                self.dict[key] = kwargs[key]
+        if fp is not None:
+            self.Load(fp)
 
 
 class Resource(BaseDict):
@@ -65,10 +63,10 @@ class Resource(BaseDict):
             "COLOR_INACTIVE"     : "#80808080",
 
             "COLOR_SIZING"       : "#00c0ff",
-            "COLOR_DLG_HEAD_FG_I": "#202020",
-            "COLOR_DLG_HEAD_FG_O": "#ffffff",
-            "COLOR_DLG_HEAD_BG_I": "#808080",
-            "COLOR_DLG_HEAD_BG_O": "#303030",
+            "COLOR_DLG_HEAD_FG_I": "#ffffff",
+            "COLOR_DLG_HEAD_FG_O": "#202020",
+            "COLOR_DLG_HEAD_BG_I": "#303030",
+            "COLOR_DLG_HEAD_BG_O": "#808080",
         }.items():
             self[key] = kwargs.get(key, default)
         # ---- Border ----
@@ -115,8 +113,8 @@ class Resource(BaseDict):
         ):
             self[key] = GetBitmaps(getattr(Img, key).GetBitmap(), 20, 20)
         # ---- Dialog ----
-        self["COLOR_DLG_HEAD_FG"] = self.GetColorSet(self["COLOR_DLG_HEAD_FG_O"], self["COLOR_DLG_HEAD_FG_I"])
-        self["BRUSH_DLG_HEAD_BG"] = self.GetBrushSet(self["COLOR_DLG_HEAD_BG_O"], self["COLOR_DLG_HEAD_BG_I"])
+        self["COLOR_DLG_HEAD_FG"] = self.GetColorSet(self["COLOR_DLG_HEAD_FG_I"], self["COLOR_DLG_HEAD_FG_O"])
+        self["BRUSH_DLG_HEAD_BG"] = self.GetBrushSet(self["COLOR_DLG_HEAD_BG_I"], self["COLOR_DLG_HEAD_BG_O"])
         self["BRUSH_DLG_SET_O"] = self.GetBrushSet(self["COLOR_DLG_HEAD_BG_O"], self["COLOR_ACTIVE"])
         self["BRUSH_DLG_SET_I"] = self.GetBrushSet(self["COLOR_DLG_HEAD_BG_I"], self["COLOR_ACTIVE"])
         self["BRUSH_DLG_SET_O_R"] = self.GetBrushSet(self["COLOR_DLG_HEAD_BG_O"], self["COLOR_R"])
