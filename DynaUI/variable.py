@@ -109,7 +109,8 @@ class Resource(BaseDict):
                 "AP_TRIANGLE_L", "AP_TRIANGLE_R", "AP_TRIANGLE_U", "AP_TRIANGLE_D",
                 "AP_CROSS", "AP_CHECK",
                 "AP_APPLY", "AP_RESET",
-                "AP_BEGIN", "AP_PAUSE",
+                "AP_BEGIN", "AP_PAUSE", "AP_ABORT",
+                "AP_TRASH", "AP_LOCAL", "AP_CLOUD",
         ):
             self[key] = GetBitmaps(getattr(Img, key).GetBitmap(), 20, 20)
         # ---- Dialog ----
