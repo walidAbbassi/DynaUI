@@ -262,17 +262,25 @@ class ImageViewer(Scrolled):
             self.LastPos = self.ClientToScreen(evtPos)
             self.LastOffset = [i for i in self.Offset]
             self.SetCursor(self.R["CURSOR_MOVING"])
+            if not self.HasCapture():
+                self.CaptureMouse()
         elif evtType == wx.wxEVT_LEFT_UP:
             self.LeftDown = False
             self.SetCursor(self.R["CURSOR_NORMAL"])
+            if self.HasCapture():
+                self.ReleaseMouse()
         elif evtType == wx.wxEVT_MIDDLE_DOWN:
             self.SetCursor(self.R["CURSOR_MOVING"])
             self.LastPos = self.ClientToScreen(evtPos)
             self.LastOffset = [i for i in self.Offset]
             self.StartTimer("Slide", 16, wx.TIMER_CONTINUOUS)
+            if not self.HasCapture():
+                self.CaptureMouse()
         elif evtType == wx.wxEVT_MIDDLE_UP:
             self.SetCursor(self.R["CURSOR_NORMAL"])
             self.StopTimer("Slide")
+            if self.HasCapture():
+                self.ReleaseMouse()
         elif evtType == wx.wxEVT_MOTION:
             self.CurrentPos = self.ClientToScreen(evtPos)
             if self.LeftDown:
