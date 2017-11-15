@@ -715,7 +715,7 @@ class Sash(Button):
             self.ReDraw()
         elif evtType == wx.wxEVT_MOTION and self.leftDown:
             if not self.sizeRect:
-                self.sizeRect = wx.MiniFrame(self, pos=self.GetScreenPosition(), size=self.GetSize(), style=wx.BORDER_NONE | wx.FRAME_FLOAT_ON_PARENT)
+                self.sizeRect = wx.Frame(self, pos=self.GetScreenPosition(), size=self.GetSize(), style=wx.BORDER_NONE | wx.FRAME_NO_TASKBAR | wx.FRAME_FLOAT_ON_PARENT)
                 self.sizeRect.SetBackgroundColour(self.R["COLOR_SIZING"])
                 self.sizeRect.SetTransparent(192)
                 self.sizeRect.Show()

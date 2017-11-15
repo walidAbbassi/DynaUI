@@ -340,7 +340,7 @@ class BaseGrip(BaseControl):
             self.lastFrameSize = None
         elif evtType == wx.wxEVT_MOTION and self.leftDown:
             if not self.sizeRect:
-                self.sizeRect = wx.MiniFrame(self, pos=self.Frame.GetPosition(), size=self.lastFrameSize, style=wx.BORDER_NONE | wx.FRAME_FLOAT_ON_PARENT)
+                self.sizeRect = wx.Frame(self, pos=self.Frame.GetPosition(), size=self.lastFrameSize, style=wx.BORDER_NONE | wx.FRAME_NO_TASKBAR | wx.FRAME_FLOAT_ON_PARENT)
                 self.sizeRect.SetBackgroundColour(self.R["COLOR_SIZING"])
                 self.sizeRect.SetTransparent(0)
                 self.sizeRect.Show()
@@ -356,7 +356,7 @@ class BaseGrip(BaseControl):
 
 
 # ===================================================== BaseDialog =====================================================
-class BaseDialog(wx.MiniFrame):
+class BaseDialog(wx.Frame):
     def __init__(self,
                  parent=None, title="", pos=wx.DefaultPosition, size=wx.DefaultSize, style=0,
                  invoker=None,
@@ -365,7 +365,7 @@ class BaseDialog(wx.MiniFrame):
                  head=BaseHead,
                  grip=BaseGrip):
         invoker = parent or invoker
-        super().__init__(parent=parent, title=invoker.L.Get(title), pos=pos, size=size, style=wx.BORDER_NONE | style)
+        super().__init__(parent=parent, title=invoker.L.Get(title), pos=pos, size=size, style=wx.BORDER_NONE | wx.FRAME_FLOAT_ON_PARENT | style)
         self.R = invoker.R
         self.S = invoker.S
         self.L = invoker.L
@@ -425,7 +425,8 @@ class BaseDialog(wx.MiniFrame):
         dc.DrawLines(self._pointsO)
 
     def OnActivation(self, evt):
-        self.Head.Play("ENTER" if evt.GetActive() else "LEAVE")
+        if self:
+            self.Head.Play("ENTER" if evt.GetActive() else "LEAVE")
 
     # --------------------------------------
     def NewAnimation(self, name, interval, variable, sequence=None, resource=True, repeat=0, onUpdate=None, onStart=None, onStop=None, onRepeat=None):
@@ -477,9 +478,9 @@ class BaseDialog(wx.MiniFrame):
 
 
 # =================================================== BaseMiniDialog ===================================================
-class BaseMiniDialog(wx.MiniFrame):
+class BaseMiniDialog(wx.Frame):
     def __init__(self, parent, pos=wx.DefaultPosition, size=wx.DefaultSize, font="N", bg="L", fg="L", main=None, **kwargs):
-        super().__init__(parent=parent, pos=pos, size=size, style=wx.BORDER_NONE)
+        super().__init__(parent=parent, pos=pos, size=size, style=wx.BORDER_NONE | wx.FRAME_NO_TASKBAR | wx.FRAME_FLOAT_ON_PARENT)
         self.R = parent.R
         self.S = parent.S
         self.L = parent.L
