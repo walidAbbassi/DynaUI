@@ -226,6 +226,10 @@ class ButtonMixinToggle(object):
         self.Play("ENTER" if self.Toggle else "LEAVE")
         Ab.Do(self.Func)
 
+    def SetToggle(self, toggle):
+        if self.IsToggled() != toggle:
+            self.Click()
+
     def IsToggled(self):
         return self.Toggle
 

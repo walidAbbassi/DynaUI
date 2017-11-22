@@ -27,8 +27,8 @@ class BaseMain(BaseControl):
     def AddSeparator(self, sizer):
         sizer.Add(UI.Separator(self, orientation=(wx.VERTICAL | wx.HORIZONTAL) ^ sizer.GetOrientation()), 0, wx.EXPAND | wx.ALL, self.MARGIN)
 
-    def AddSectionHead(self, sizer, orientation=wx.HORIZONTAL, label="", shape="B"):
-        sizer.Add(UI.SectionHead(self, orientation=orientation, label=label, shape=shape), 0, wx.EXPAND | wx.ALL, self.MARGIN)
+    def AddSectionHead(self, sizer, tag="", **kwargs):
+        sizer.Add(UI.SectionHead(self, orientation=(wx.VERTICAL | wx.HORIZONTAL) ^ sizer.GetOrientation(), label=tag, **kwargs), 0, wx.EXPAND | wx.ALL, self.MARGIN)
 
     # --------------------------
     def AddButton(self, sizer, label="", tag="", width=80, onClick=None, **kwargs):
@@ -191,7 +191,9 @@ class BaseMain(BaseControl):
         return listbox
 
     # --------------------------
-    def AddFilePicker(self, sizer, label="", value="", width=-1, mode="S", wildcard="All files (*.*)|*.*", style=0, onSelect=Ab.DoNothing):
+    def AddPickerFile(self, sizer, label="", value="", width=-1, mode="S", wildcard="All files (*.*)|*.*", style=0, onSelect=None):
+        if onSelect is None:
+            onSelect = Ab.DoNothing
         text = UI.Text(self, value=value, size=wx.Size(width, self.LINE_HEIGHT), style=style | wx.BORDER_SIMPLE)
         if mode == "L":
             func = lambda: text.SetValue(Ut.ShowOpenFileDialog(self, self.L.Get("GENERAL_HEAD_LOAD"), wildcard) or "")

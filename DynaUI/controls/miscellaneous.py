@@ -182,7 +182,7 @@ class SectionHead(BaseControl):
         mdc.SetBackground(self.BackgroundBrush)
         mdc.SetTextForeground(self.GetForegroundColour())
         mdc.Clear()
-        if shape == "R":
+        if shape == "S":
             pointsO = ((0, h2 - 1), (0, 0), (w - 1, 0), (w - 1, h2))
             pointsI = ((0, h2), (0, h - 1), (w - 1, h - 1), (w - 1, h2 - 1))
         elif shape == "C":
