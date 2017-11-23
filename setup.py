@@ -22,7 +22,7 @@ setup(
         "Programming Language :: Python :: 3.5",
         "Programming Language :: Python :: 3.6",
     ],
-    keywords=["GUI", "UI", "wxPython", "user-interface"],
+    keywords="GUI UI wxPython user-interface",
     packages=["DynaUI", "DynaUI.controls", "DynaUI.demo"],
     package_data={
         "DynaUI.demo": ["*.png", "*.jpg"],

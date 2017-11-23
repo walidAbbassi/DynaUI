@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-
+import os
 import wx
 from DynaUI import *
 
@@ -222,10 +222,13 @@ if __name__ == "__main__":
     Setting = Setting()
     Locale = Locale()
 
-    Resource["TOOL_SETTING"] = GetBitmaps(wx.Bitmap("image1.png"), 20, 20)
-    Resource["UI_IMAGE2"] = wx.Bitmap("image2.png")
-    Resource["UI_IMAGE3"] = wx.Bitmap("image3.png")
-    Resource["UI_IMAGE4"] = wx.Bitmap("image4.jpg")
+    MAIN_PATH = os.path.dirname(os.path.realpath(__file__))
+    Here = lambda f="": os.path.join(MAIN_PATH, f)
+
+    Resource["TOOL_SETTING"] = GetBitmaps(wx.Bitmap(Here("image1.png")), 20, 20)
+    Resource["UI_IMAGE2"] = wx.Bitmap(Here("image2.png"))
+    Resource["UI_IMAGE3"] = wx.Bitmap(Here("image3.png"))
+    Resource["UI_IMAGE4"] = wx.Bitmap(Here("image4.jpg"))
     Locale["TOOL_SETTING"] = "Tool Buttons"
 
     Frame = ExampleUI(Resource, Setting, Locale)
