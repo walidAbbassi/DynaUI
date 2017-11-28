@@ -16,6 +16,7 @@ class BaseMain(BaseControl):
     MARGIN = 4
     LABEL_WIDTH = 80
     LINE_HEIGHT = 20
+    BUTTON_WIDTH = 80
 
     def __init__(self, parent, pos=wx.DefaultPosition, size=wx.DefaultSize, style=0,
                  font=None, res=None, bg="L", fg="L", edge=None, async=False, fpsLimit=0):
@@ -31,7 +32,9 @@ class BaseMain(BaseControl):
         sizer.Add(UI.SectionHead(self, orientation=(wx.VERTICAL | wx.HORIZONTAL) ^ sizer.GetOrientation(), label=tag, **kwargs), 0, wx.EXPAND | wx.ALL, self.MARGIN)
 
     # --------------------------
-    def AddButton(self, sizer, label="", tag="", width=80, onClick=None, **kwargs):
+    def AddButton(self, sizer, label="", tag="", width=None, onClick=None, **kwargs):
+        if width is None:
+            width = self.BUTTON_WIDTH
         subSizer = wx.BoxSizer(wx.HORIZONTAL)
         if label:
             name = wx.StaticText(self, label=label, size=wx.Size(self.LABEL_WIDTH, -1), style=wx.ST_ELLIPSIZE_END)
@@ -45,7 +48,9 @@ class BaseMain(BaseControl):
             sizer.Add(subSizer, width == -1, wx.ALL, self.MARGIN)
         return button
 
-    def AddButtonToggle(self, sizer, label="", tags=(), width=80, toggle=False, onClick=None, **kwargs):
+    def AddButtonToggle(self, sizer, label="", tags=(), width=None, toggle=False, onClick=None, **kwargs):
+        if width is None:
+            width = self.BUTTON_WIDTH
         subSizer = wx.BoxSizer(wx.HORIZONTAL)
         if label:
             name = wx.StaticText(self, label=label, size=wx.Size(self.LABEL_WIDTH, -1), style=wx.ST_ELLIPSIZE_END)
@@ -59,7 +64,9 @@ class BaseMain(BaseControl):
             sizer.Add(subSizer, width == -1, wx.ALL, self.MARGIN)
         return button
 
-    def AddButtonBundle(self, sizer, label="", tags=(), width=80, rows=1, toggled=0, group="", onClick=None, **kwargs):
+    def AddButtonBundle(self, sizer, label="", tags=(), width=None, rows=1, toggled=0, group="", onClick=None, **kwargs):
+        if width is None:
+            width = self.BUTTON_WIDTH
         bPerRow = (len(tags) + rows - 1) // rows
         subSizers = [wx.BoxSizer(wx.HORIZONTAL) for i in range(rows)]
         if label:
@@ -83,7 +90,9 @@ class BaseMain(BaseControl):
             sizer.Add(subSizer, width == -1, wx.ALL, self.MARGIN)
         return UI.Bundled(buttons)
 
-    def AddPickerValue(self, sizer, label="", choices=(), selected=-1, width=80, **kwargs):
+    def AddPickerValue(self, sizer, label="", choices=(), selected=-1, width=None, **kwargs):
+        if width is None:
+            width = self.BUTTON_WIDTH
         subSizer = wx.BoxSizer(wx.HORIZONTAL)
         if label:
             name = wx.StaticText(self, label=label, size=wx.Size(self.LABEL_WIDTH, -1), style=wx.ST_ELLIPSIZE_END)
@@ -191,23 +200,28 @@ class BaseMain(BaseControl):
         return listbox
 
     # --------------------------
-    def AddPickerFile(self, sizer, label="", value="", width=-1, mode="S", wildcard="All files (*.*)|*.*", style=0, onSelect=None):
+    def AddPickerFile(self, sizer, label="", value="", width=-1, width2=None, mode="L", wildcard="All files (*.*)|*.*", hint="", style=0, onSelect=None):
+        if width2 is None:
+            width2 = self.BUTTON_WIDTH
         if onSelect is None:
             onSelect = Ab.DoNothing
-        text = UI.Text(self, value=value, size=wx.Size(width, self.LINE_HEIGHT), style=style | wx.BORDER_SIMPLE)
+        if hint:
+            text = UI.TextWithHint(self, hint=hint, value=value, size=wx.Size(width, self.LINE_HEIGHT), style=style | wx.BORDER_SIMPLE)
+        else:
+            text = UI.Text(self, value=value, size=wx.Size(width, self.LINE_HEIGHT), style=style | wx.BORDER_SIMPLE)
         if mode == "L":
             func = lambda: text.SetValue(Ut.ShowOpenFileDialog(self, self.L.Get("GENERAL_HEAD_LOAD"), wildcard) or "")
         else:
             func = lambda: text.SetValue(Ut.ShowSaveFileDialog(self, self.L.Get("GENERAL_HEAD_SAVE"), wildcard) or "")
-        button = UI.Button(self, size=wx.Size(self.LABEL_WIDTH, self.LINE_HEIGHT), tag="...", edge="L", func=((self.GetGrandParent().Disable,), func, onSelect, self.GetGrandParent().Enable))
+        button = UI.Button(self, size=wx.Size(width2, self.LINE_HEIGHT), tag="...", edge="L", func=((self.GetGrandParent().Disable,), func, onSelect, self.GetGrandParent().Enable))
         subSizer = wx.BoxSizer(wx.HORIZONTAL)
         if label:
             name = wx.StaticText(self, label=label, size=wx.Size(self.LABEL_WIDTH, -1), style=wx.ST_ELLIPSIZE_END)
             name.Bind(wx.EVT_LEFT_DOWN, lambda evt: (text.SetFocus(), text.SelectAll()))
             subSizer.Add(name, 0, wx.ALIGN_CENTER)
             subSizer.Add(self.MARGIN * 2, self.MARGIN)
-        subSizer.Add(text, width == -1, wx.RIGHT, self.MARGIN)
-        subSizer.Add(button, 0, wx.LEFT, self.MARGIN)
+        subSizer.Add(text, width == -1)
+        subSizer.Add(button, 0)
         if sizer.GetOrientation() == wx.VERTICAL:
             sizer.Add(subSizer, 0, wx.EXPAND | wx.ALL, self.MARGIN)
         else:
