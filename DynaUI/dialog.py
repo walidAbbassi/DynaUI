@@ -38,7 +38,7 @@ class BaseMain(BaseControl):
         subSizer = wx.BoxSizer(wx.HORIZONTAL)
         if label:
             name = wx.StaticText(self, label=label, size=wx.Size(self.LABEL_WIDTH, -1), style=wx.ST_ELLIPSIZE_END)
-            subSizer.Add(name, 0, wx.ALIGN_CENTER)
+            subSizer.Add(name, self.LABEL_WIDTH == -1, wx.ALIGN_CENTER)
             subSizer.Add(self.MARGIN * 2, self.MARGIN)
         button = UI.ButtonNormal(self, size=wx.Size(width, self.LINE_HEIGHT), tag=tag, func=onClick, edge="L", **kwargs)
         subSizer.Add(button, width == -1)
@@ -54,7 +54,7 @@ class BaseMain(BaseControl):
         subSizer = wx.BoxSizer(wx.HORIZONTAL)
         if label:
             name = wx.StaticText(self, label=label, size=wx.Size(self.LABEL_WIDTH, -1), style=wx.ST_ELLIPSIZE_END)
-            subSizer.Add(name, 0, wx.ALIGN_CENTER)
+            subSizer.Add(name, self.LABEL_WIDTH == -1, wx.ALIGN_CENTER)
             subSizer.Add(self.MARGIN * 2, self.MARGIN)
         button = UI.ButtonToggle(self, size=wx.Size(width, self.LINE_HEIGHT), tag=tags[0], tag2=tags[1], func=onClick, edge="L", toggle=toggle, **kwargs)
         subSizer.Add(button, width == -1)
@@ -71,7 +71,7 @@ class BaseMain(BaseControl):
         subSizers = [wx.BoxSizer(wx.HORIZONTAL) for i in range(rows)]
         if label:
             name = wx.StaticText(self, label=label, size=wx.Size(self.LABEL_WIDTH, -1), style=wx.ST_ELLIPSIZE_END)
-            subSizers[0].Add(name, 0, wx.ALIGN_CENTER)
+            subSizers[0].Add(name, self.LABEL_WIDTH == -1, wx.ALIGN_CENTER)
             subSizers[0].Add(self.MARGIN * 2, self.MARGIN)
             for s in subSizers[1:]:
                 s.Add(self.LABEL_WIDTH, -1, 0, wx.ALIGN_CENTER)
@@ -96,7 +96,7 @@ class BaseMain(BaseControl):
         subSizer = wx.BoxSizer(wx.HORIZONTAL)
         if label:
             name = wx.StaticText(self, label=label, size=wx.Size(self.LABEL_WIDTH, -1), style=wx.ST_ELLIPSIZE_END)
-            subSizer.Add(name, 0, wx.ALIGN_CENTER)
+            subSizer.Add(name, self.LABEL_WIDTH == -1, wx.ALIGN_CENTER)
             subSizer.Add(self.MARGIN * 2, self.MARGIN)
         picker = UI.PickerValue(self, size=wx.Size(width, self.LINE_HEIGHT), choices=choices, selected=selected, edge="L", **kwargs)
         subSizer.Add(picker, width == -1)
@@ -111,7 +111,7 @@ class BaseMain(BaseControl):
         subSizer = wx.BoxSizer(wx.HORIZONTAL)
         if label:
             name = wx.StaticText(self, label=label, size=wx.Size(self.LABEL_WIDTH, -1), style=wx.ST_ELLIPSIZE_END)
-            subSizer.Add(name, 0, wx.ALIGN_CENTER)
+            subSizer.Add(name, self.LABEL_WIDTH == -1, wx.ALIGN_CENTER)
             subSizer.Add(self.MARGIN * 2, self.MARGIN)
         text = wx.StaticText(self, label=value, size=wx.Size(width, -1), style=wx.ST_ELLIPSIZE_END)
         subSizer.SetMinSize(-1, self.LINE_HEIGHT)
@@ -130,7 +130,7 @@ class BaseMain(BaseControl):
         if label:
             name = wx.StaticText(self, label=label, size=wx.Size(self.LABEL_WIDTH, -1), style=wx.ST_ELLIPSIZE_END)
             name.Bind(wx.EVT_LEFT_DOWN, lambda evt: (text.SetFocus(), text.SelectAll()))
-            subSizer.Add(name, 0, wx.ALIGN_CENTER)
+            subSizer.Add(name, self.LABEL_WIDTH == -1, wx.ALIGN_CENTER)
             subSizer.Add(self.MARGIN * 2, self.MARGIN)
         if onInput:
             text.Bind(wx.EVT_TEXT, onInput)
@@ -158,13 +158,13 @@ class BaseMain(BaseControl):
         if inline:
             subSizer = wx.BoxSizer(wx.HORIZONTAL)
             if name:
-                subSizer.Add(name, 0, wx.ALIGN_CENTER)
+                subSizer.Add(name, self.LABEL_WIDTH == -1, wx.ALIGN_CENTER)
                 subSizer.Add(self.MARGIN * 2, self.MARGIN)
             subSizer.Add(text, width == -1, wx.EXPAND)
         else:
             subSizer = wx.BoxSizer(wx.VERTICAL)
             if name:
-                subSizer.Add(name, 0, wx.EXPAND)
+                subSizer.Add(name, self.LABEL_WIDTH == -1, wx.EXPAND)
             subSizer.Add(text, height == -1, wx.EXPAND)
         if sizer.GetOrientation() == wx.VERTICAL:
             sizer.Add(subSizer, height == -1, (width == -1 and wx.EXPAND) | wx.ALL, self.MARGIN)
@@ -185,13 +185,13 @@ class BaseMain(BaseControl):
         if inline:
             subSizer = wx.BoxSizer(wx.HORIZONTAL)
             if name:
-                subSizer.Add(name, 0, wx.ALIGN_CENTER)
+                subSizer.Add(name, self.LABEL_WIDTH == -1, wx.ALIGN_CENTER)
                 subSizer.Add(self.MARGIN * 2, self.MARGIN)
             subSizer.Add(listbox, width == -1, wx.EXPAND)
         else:
             subSizer = wx.BoxSizer(wx.VERTICAL)
             if name:
-                subSizer.Add(name, 0, wx.EXPAND)
+                subSizer.Add(name, self.LABEL_WIDTH == -1, wx.EXPAND)
             subSizer.Add(listbox, height == -1, wx.EXPAND)
         if sizer.GetOrientation() == wx.VERTICAL:
             sizer.Add(subSizer, height == -1, (width == -1 and wx.EXPAND) | wx.ALL, self.MARGIN)
@@ -218,10 +218,10 @@ class BaseMain(BaseControl):
         if label:
             name = wx.StaticText(self, label=label, size=wx.Size(self.LABEL_WIDTH, -1), style=wx.ST_ELLIPSIZE_END)
             name.Bind(wx.EVT_LEFT_DOWN, lambda evt: (text.SetFocus(), text.SelectAll()))
-            subSizer.Add(name, 0, wx.ALIGN_CENTER)
+            subSizer.Add(name, self.LABEL_WIDTH == -1, wx.ALIGN_CENTER)
             subSizer.Add(self.MARGIN * 2, self.MARGIN)
         subSizer.Add(text, width == -1)
-        subSizer.Add(button, 0)
+        subSizer.Add(button, width2 == -1)
         if sizer.GetOrientation() == wx.VERTICAL:
             sizer.Add(subSizer, 0, wx.EXPAND | wx.ALL, self.MARGIN)
         else:
