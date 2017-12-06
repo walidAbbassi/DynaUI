@@ -58,6 +58,8 @@ class ScrollBar(object):
 
     def HandleMouse(self, evtType, evtPos):
         if evtType == wx.wxEVT_LEFT_DOWN:
+            if not self.W.HasCapture():
+                self.W.CaptureMouse()
             self.Activate = True
             if not self.R.Contains(evtPos):
                 delta = (evtPos[self.O] - (self.R.GetSize()[self.O] >> 1) - self.R.GetPosition()[self.O]) * self.W.ASize[self.O] // (self.A.GetSize()[self.O] * self.W.Step[self.O])  # DIVISION
@@ -67,6 +69,8 @@ class ScrollBar(object):
             self.LeftPos = evtPos
             self.LastOffset = [i for i in self.W.Offset]
         elif evtType == wx.wxEVT_LEFT_UP:
+            if self.W.HasCapture():
+                self.W.ReleaseMouse()
             self.Activate = False
         elif evtType == wx.wxEVT_MOTION and self.Activate:
             delta = (evtPos[self.O] - self.LeftPos[self.O]) * self.W.ASize[self.O] // (self.A.GetSize()[self.O] * self.W.Step[self.O])  # DIVISION
@@ -84,7 +88,6 @@ class Scrolled(BaseControl):
         self.Bind(wx.EVT_SIZE, self.SetWindowSize)
         self.Bind(wx.EVT_MOUSEWHEEL, self.OnWheel)
         self.Bind(wx.EVT_MOUSE_EVENTS, self.HandleMouse)
-        self.Bind(wx.EVT_MOUSE_CAPTURE_LOST, lambda evt: None)
         self.ASize = [20, 20]  # Actual
         self.VSize = [20, 20]  # Visible
         self.VRect = wx.Rect(1, 1, 20, 20)
