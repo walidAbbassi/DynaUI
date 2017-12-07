@@ -1,6 +1,13 @@
 from wx.lib.embeddedimage import PyEmbeddedImage
 
 # ----------------------------------------------------------------------
+DynaUI = PyEmbeddedImage(
+    b'iVBORw0KGgoAAAANSUhEUgAAACgAAAAoCAYAAACM/rhtAAAAn0lEQVRYw+2XOw6AIBAFecYT'
+    b'0FNy/wNR0nOFtTIaolEEFORRE5jssB8gIqrlNanGFwEJSMDeAeeEvXcKJqi4N8WHWoHNZNQq'
+    b'pbTuvhQHYyUY29T0gHia2QNq77LOLv4GVzjtHRJKy7sRfFD73otgwiXCQj1SL0bG+wUVN9mL'
+    b'K+0HFX+dxWfZl1O05Uo3FdceFvhpGiqLwQgSkIAE/CHgAkx5Kq3ZLQS+AAAAAElFTkSuQmCC')
+
+# ----------------------------------------------------------------------
 Hider = PyEmbeddedImage(
     b'iVBORw0KGgoAAAANSUhEUgAAAAgAAAMgCAYAAAAeGCNNAAADRklEQVR42uxcC07jUAy0rT3A'
     b'9v6HzA3sZRGgktT196XQuhICieF5Zjx20kgURQTuvQiM1wAGMIABDGAAAxjAAAYwgAEMYAAD'

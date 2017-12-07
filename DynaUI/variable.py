@@ -100,6 +100,7 @@ class Resource(BaseDict):
         self["CURSOR_SASH_H"] = wx.Cursor(wx.CURSOR_SIZEWE)
         self["CURSOR_SASH_V"] = wx.Cursor(wx.CURSOR_SIZENS)
         # ---- Image ----
+        self["__DynaUI__"] = Img.DynaUI.GetBitmap()
         self["BITMAP_SLIDER"] = Img.Slider.GetBitmap()
         # ---- Image Set ----
         self["BITMAPS_HIDER"] = GetBitmaps(Img.Hider.GetBitmap(), 2, 800)

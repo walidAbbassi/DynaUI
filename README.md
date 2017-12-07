@@ -1,4 +1,4 @@
-# DynaUI
+# ![Concept](assets/img/DynaUI.png) DynaUI
 
 To get started, install with pip:
 
