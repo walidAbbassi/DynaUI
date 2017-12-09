@@ -40,8 +40,14 @@ class Setting(BaseDict):
 
 
 class Resource(BaseDict):
-    def __init__(self, **kwargs):
+    DEFAULT = {}
+
+    def __init__(self, fp=None):
         super().__init__()
+        self.dict = self.DEFAULT
+        if fp is not None:
+            self.Load(fp)
+        self["__DynaUI__"] = Img.DynaUI.GetBitmap()
         # ---- Color ----
         for key, default in {
             "COLOR_R"            : "#ff0000",
@@ -68,7 +74,7 @@ class Resource(BaseDict):
             "COLOR_DLG_HEAD_BG_I": "#303030",
             "COLOR_DLG_HEAD_BG_O": "#808080",
         }.items():
-            self[key] = kwargs.get(key, default)
+            self[key] = self.dict.get(key, default)
         # ---- Border ----
         self["PEN_EDGE_D"] = wx.Pen(self["COLOR_EDGE_D"])
         self["PEN_EDGE_L"] = wx.Pen(self["COLOR_EDGE_L"])
@@ -100,7 +106,6 @@ class Resource(BaseDict):
         self["CURSOR_SASH_H"] = wx.Cursor(wx.CURSOR_SIZEWE)
         self["CURSOR_SASH_V"] = wx.Cursor(wx.CURSOR_SIZENS)
         # ---- Image ----
-        self["__DynaUI__"] = Img.DynaUI.GetBitmap()
         self["BITMAP_SLIDER"] = Img.Slider.GetBitmap()
         # ---- Image Set ----
         self["BITMAPS_HIDER"] = GetBitmaps(Img.Hider.GetBitmap(), 2, 800)

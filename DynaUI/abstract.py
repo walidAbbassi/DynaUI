@@ -19,12 +19,16 @@ class BaseDict(object):
     def __init__(self):
         self.dict = {}
         self.filename = None
+        self.ok = False
 
     def __setitem__(self, key, value):
         self.dict[key] = value
 
     def __getitem__(self, key):
         return self.dict[key]
+
+    def __delitem__(self, key):
+        del self.dict[key]
 
     def __iter__(self):
         return self.dict.__iter__()
@@ -33,25 +37,30 @@ class BaseDict(object):
         return self.dict.get(item)
 
     def Get(self, item, prefix="", suffix=""):
-        try:
-            return self.dict[prefix + item + suffix]
-        except Exception:
-            return item
+        return self.dict.get(prefix + item + suffix, item)
 
     def Load(self, filename):
-        if not os.path.exists(filename):
-            with open(filename, "wb") as f:
-                f.write(b"\x7b\x7d")
-        with open(filename, "r", encoding="utf-8") as f:
-            for key, value in json.load(f).items():
-                if key in self.dict:
-                    self.dict[key] = value
-        self.filename = filename
+        try:
+            if not os.path.exists(filename):
+                with open(filename, "wb") as f:
+                    f.write(b"\x7b\x7d")
+            with open(filename, "r", encoding="utf-8") as f:
+                for key, value in json.load(f).items():
+                    if key in self.dict:
+                        self.dict[key] = value
+            self.filename = filename
+            self.ok = True
+        except Exception:
+            self.ok = False
 
     def Save(self):
-        if self.filename is not None:
-            with open(self.filename, "w", encoding="utf-8") as f:
-                json.dump(self.dict, f)
+        try:
+            if self.filename is not None:
+                with open(self.filename, "w", encoding="utf-8") as f:
+                    json.dump(self.dict, f)
+            return True
+        except Exception:
+            return False
 
 
 def Do(func):
