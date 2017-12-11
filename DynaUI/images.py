@@ -8,26 +8,6 @@ DynaUI = PyEmbeddedImage(
     b'K+0HFX+dxWfZl1O05Uo3FdceFvhpGiqLwQgSkIAE/CHgAkx5Kq3ZLQS+AAAAAElFTkSuQmCC')
 
 # ----------------------------------------------------------------------
-Hider = PyEmbeddedImage(
-    b'iVBORw0KGgoAAAANSUhEUgAAAAgAAAMgCAYAAAAeGCNNAAADRklEQVR42uxcC07jUAy0rT3A'
-    b'9v6HzA3sZRGgktT196XQuhICieF5Zjx20kgURQTuvQiM1wAGMIABDGAAAxjAAAYwgAEMYAAD'
-    b'GMAABjCAAeQAf7RfbNt2H/D2wkeTdHMwTzhB5ouoOEHmkMwCPqf6HgdcTxLLRmGoxJpmNXNY'
-    b'0wtsA5yVhxQHfC0O3wFXU62egG2Ro3QJ9JJcOFloyQyTpLCTdR/c3aR1JdxOkmZUvQSUm4Xn'
-    b'NSsI0Kb6+gQsc8B2QHw/1EtgNFHk5fCVB1JKHBJFVgl1P9wkd10i3SywAFS2+mAUeUfvUIKs'
-    b'EmhtGLdR1GYUWirMdpsqwDsXZi/MTJLbKMpmkjSSZPXC7QOFp5vKKsLtNgMT7wVEY79QBYSX'
-    b'eboXWM5knoOpIu9DeIkt8ME9OGQlauESUy/N7g0D6Tw8oFnuyEF6idWv/vFUuwNjloD2XsC6'
-    b'BfITlljfxT0/F2BxoDIHKPtAXhX1TDb2ov72Ie1kPdX+u8F6YMwtd8LgYDm0fe0OP1VrXKTh'
-    b'XuQfL0CUpJ+D2yiIRs7/0MztJFhOQjsHLJPULyKhE/4DpFSCPk6QTAnUAJ+kZW+1WCfgLeAt'
-    b'AOxLyO4v1Wek4lVxMIo/vlSjtBJgkVRViEVSBUjUKLFOAIvkF4B38RNt9G6edM/q96yGjLr5'
-    b'3aUi7OShBC/jAGkOvH8blZYJZZkqSSgbJeuaxZYP4D0BvM3K96IeWvaqWJgHSfvA53OQ9RzA'
-    b'yqSkM8nh2eSoDxy+4qTngjUO5iLltv2QN0otAVGrzQsKp0PL4RWkkeRw7PuXeX782ZIJ5RN+'
-    b'xRKLL5DwCnKvQU6vQfdNDvercC+x+v0kayrCwxtXkb/R0tZg4xKTbGgbl5hEI1cvYaow3/O6'
-    b'l5gZOf+l2W1UvRemCtBKQPZGy68CokbFL0mmUbC+RJjDd8Dlcnn/Ydu25Ak/HAAWgPcAaCsB'
-    b'1gmscegroaoALXJ9Jdwc8s2q5wEsmXBeaCHdrPtOXk15XmYfoI8DPDcHWM9B1nNojlzp/7Me'
-    b'yaE5D6h9Qt3blP9dZ1QMUOdwgornIPkcRr2IChOA8/mTAxjAAAYwgAEMYAADGMAABjCAAQxg'
-    b'AAMYwAAeBPgnwADuwZD1VbQ80QAAAABJRU5ErkJggg==')
-
-# ----------------------------------------------------------------------
 Slider = PyEmbeddedImage(
     b'iVBORw0KGgoAAAANSUhEUgAAAAwAAAAMCAYAAABWdVznAAABoElEQVR42kxSy2rCQBSdTOIz'
     b'ttpEkYAiLYUW+g0W/InGX+imX9GPKPgH4kpw0ZXdubHLCBVCwRZNo1HjG41pzw0RGjjJcOec'

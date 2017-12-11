@@ -128,7 +128,7 @@ class ExampleUI(wx.Frame):
         Sizer.Add(ListCtrl(self.Main, (("ListBox",), ("is",), ("one",), ("column",), ("ListCtrl",)) * 100, (-1,)), SF_110A4)
         Sizer.Add(ListCtrl(self.Main, [("A%s" % i, "B%s" % i, "C%s" % i) for i in range(200)], (-2, -2, -2)), SF_110A4)
         iv = ImageViewer(self.Main, self.R["UI_IMAGE4"])
-        Sizer.Add(Hider(self.Main, targets=(iv,), size=(4, -1), edge=None), SF_010A2)
+        Sizer.Add(Hider(self.Main, targets=(iv,), edge=None), SF_010A2)
         Sizer.Add(iv, SF_410A4)
         MainSizer.Add(Sizer, 1, wx.EXPAND)
 

@@ -108,7 +108,6 @@ class Resource(BaseDict):
         # ---- Image ----
         self["BITMAP_SLIDER"] = Img.Slider.GetBitmap()
         # ---- Image Set ----
-        self["BITMAPS_HIDER"] = GetBitmaps(Img.Hider.GetBitmap(), 2, 800)
         for key in (
                 "AP_MINI", "AP_MAXI", "AP_EXIT", "AP_HELP",
                 "AP_ARROW_L", "AP_ARROW_R", "AP_ARROW_U", "AP_ARROW_D",

@@ -640,9 +640,16 @@ class PickerValue(ToolNormal):
 
 
 # Misc Buttons
-class Hider(ToolNormal):
-    def __init__(self, parent, targets, pics=None, size=wx.Size(2, -1), font=None, res="L", bg="L", fg="L", edge="H", async=False, fpsLimit=0):
-        super().__init__(parent=parent, size=size, func=self.OnHider, pics=pics or parent.R["BITMAPS_HIDER"], font=font, res=res, bg=bg, fg=fg, edge=edge, async=async, fpsLimit=fpsLimit)
+class Hider(Button):
+    def __init__(self, parent, targets, orientation="V", func=Ab.DoNothing, font="I", res="L", bg="L", fg="D", edge=None):
+        self.orientation = orientation
+        if self.orientation == "V":
+            size = wx.Size(4, -1)
+            pic = parent.R["AP_MINI"][0].ConvertToImage().Rotate90().Mirror().ConvertToBitmap()
+        else:
+            size = wx.Size(-1, 4)
+            pic = parent.R["AP_MINI"][0]
+        super().__init__(parent=parent, size=size, pic=pic, func=((self.OnHider,), func), font=font, res=res, bg=bg, fg=fg, edge=edge)
         self.Targets = targets
         self.show = True
 
@@ -662,15 +669,15 @@ class Sash(Button):
         self.orientation = "H" if direction in "LR" else "V"
         if self.orientation == "H":
             size = wx.Size(4, -1)
-            tag = "|"
+            pic = parent.R["AP_MINI"][0].ConvertToImage().Rotate90().Mirror().ConvertToBitmap()
             self.dimension = 0
             self.cursor = parent.R["CURSOR_SASH_H"]
         else:
             size = wx.Size(-1, 4)
-            tag = "--"
+            pic = parent.R["AP_MINI"][0]
             self.dimension = 1
             self.cursor = parent.R["CURSOR_SASH_V"]
-        super().__init__(parent=parent, size=size, tag=tag, func=parent.Layout if func is None else func, font=font, res=res, bg=bg, fg=fg, edge=edge)
+        super().__init__(parent=parent, size=size, pic=pic, func=parent.Layout if func is None else func, font=font, res=res, bg=bg, fg=fg, edge=edge)
         self.Bind(wx.EVT_MOUSE_EVENTS, self.OnMouse)
         self.Target = target
         self.multiplier = {"L": 1, "R": -1, "T": 1, "B": -1}[direction]
