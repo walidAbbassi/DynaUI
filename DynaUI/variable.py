@@ -118,6 +118,8 @@ class Resource(BaseDict):
                 "AP_TRASH", "AP_LOCAL", "AP_CLOUD",
         ):
             self[key] = GetBitmaps(getattr(Img, key).GetBitmap(), 20, 20)
+        self["AP_HIDER_V"] = [self["AP_MINI"][0].ConvertToImage().AdjustChannels(x, x, x).Rotate90().Mirror().ConvertToBitmap() for x in (0.55, 0.70, 0.85, 1)]
+        self["AP_HIDER_H"] = [self["AP_MINI"][0].ConvertToImage().AdjustChannels(x, x, x).ConvertToBitmap() for x in (0.55, 0.70, 0.85, 1)]
         # ---- Dialog ----
         self["COLOR_DLG_HEAD_FG"] = self.GetColorSet(self["COLOR_DLG_HEAD_FG_I"], self["COLOR_DLG_HEAD_FG_O"])
         self["BRUSH_DLG_HEAD_BG"] = self.GetBrushSet(self["COLOR_DLG_HEAD_BG_I"], self["COLOR_DLG_HEAD_BG_O"])

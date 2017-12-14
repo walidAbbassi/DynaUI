@@ -640,16 +640,16 @@ class PickerValue(ToolNormal):
 
 
 # Misc Buttons
-class Hider(Button):
+class Hider(ToolNormal):
     def __init__(self, parent, targets, orientation="V", func=Ab.DoNothing, font="I", res="L", bg="L", fg="D", edge=None):
         self.orientation = orientation
         if self.orientation == "V":
             size = wx.Size(4, -1)
-            pic = parent.R["AP_MINI"][0].ConvertToImage().Rotate90().Mirror().ConvertToBitmap()
+            pics = parent.R["AP_HIDER_V"]
         else:
             size = wx.Size(-1, 4)
-            pic = parent.R["AP_MINI"][0]
-        super().__init__(parent=parent, size=size, pic=pic, func=((self.OnHider,), func), font=font, res=res, bg=bg, fg=fg, edge=edge)
+            pics = parent.R["AP_HIDER_H"]
+        super().__init__(parent=parent, size=size, pics=pics, func=((self.OnHider,), func), font=font, res=res, bg=bg, fg=fg, edge=edge)
         self.Targets = targets
         self.show = True
 
@@ -664,20 +664,20 @@ class Hider(Button):
         self.GetParent().Layout()
 
 
-class Sash(Button):
+class Sash(ToolNormal):
     def __init__(self, parent, target, direction="L", vRange=(150, 600), func=None, font="I", res="L", bg="L", fg="D", edge=None):
         self.orientation = "H" if direction in "LR" else "V"
         if self.orientation == "H":
             size = wx.Size(4, -1)
-            pic = parent.R["AP_MINI"][0].ConvertToImage().Rotate90().Mirror().ConvertToBitmap()
+            pics = parent.R["AP_HIDER_V"]
             self.dimension = 0
             self.cursor = parent.R["CURSOR_SASH_H"]
         else:
             size = wx.Size(-1, 4)
-            pic = parent.R["AP_MINI"][0]
+            pics = parent.R["AP_HIDER_H"]
             self.dimension = 1
             self.cursor = parent.R["CURSOR_SASH_V"]
-        super().__init__(parent=parent, size=size, pic=pic, func=parent.Layout if func is None else func, font=font, res=res, bg=bg, fg=fg, edge=edge)
+        super().__init__(parent=parent, size=size, pics=pics, func=parent.Layout if func is None else func, font=font, res=res, bg=bg, fg=fg, edge=edge)
         self.Bind(wx.EVT_MOUSE_EVENTS, self.OnMouse)
         self.Target = target
         self.multiplier = {"L": 1, "R": -1, "T": 1, "B": -1}[direction]
