@@ -15,7 +15,7 @@ __all__ = ["BaseMain", "BaseHead", "BaseGrip", "BaseDialog", "BaseMiniDialog"]
 class BaseMain(BaseControl):
     MARGIN = 4
     LABEL_WIDTH = 80
-    LINE_HEIGHT = 20
+    LINE_HEIGHT = 24
     BUTTON_WIDTH = 80
 
     def __init__(self, parent, pos=wx.DefaultPosition, size=wx.DefaultSize, style=0,
@@ -119,14 +119,40 @@ class BaseMain(BaseControl):
         sizer.Add(subSizer, 0, wx.EXPAND | wx.ALL, self.MARGIN)
         return text
 
-    def AddLineCtrl(self, sizer, label="", value="", width=-1, style=0, onInput=None, hint="", font=None):
-        subSizer = wx.BoxSizer(wx.HORIZONTAL)
-        if hint:
-            text = UI.TextWithHint(self, hint=hint, value=value, size=wx.Size(width, self.LINE_HEIGHT), style=style | wx.BORDER_SIMPLE)
+    def AddStaticBitmap(self, sizer, label="", width=-1, height=-1, inline=True, bitmap=wx.NullBitmap, **kwargs):
+        pic = UI.StaticBitmap(self, size=wx.Size(width, height), bitmap=bitmap, **kwargs)
+        if label:
+            name = wx.StaticText(self, label=label, size=wx.Size(self.LABEL_WIDTH, -1 if inline else self.LINE_HEIGHT), style=wx.ST_ELLIPSIZE_END)
         else:
-            text = UI.Text(self, value=value, size=wx.Size(width, self.LINE_HEIGHT), style=style | wx.BORDER_SIMPLE)
+            name = None
+        if inline:
+            subSizer = wx.BoxSizer(wx.HORIZONTAL)
+            if name:
+                subSizer.Add(name, self.LABEL_WIDTH == -1, wx.ALIGN_CENTER)
+                subSizer.Add(self.MARGIN * 2, self.MARGIN)
+            subSizer.Add(pic, width == -1, wx.EXPAND)
+        else:
+            subSizer = wx.BoxSizer(wx.VERTICAL)
+            if name:
+                subSizer.Add(name, self.LABEL_WIDTH == -1, wx.EXPAND)
+            subSizer.Add(pic, height == -1, wx.EXPAND)
+        if sizer.GetOrientation() == wx.VERTICAL:
+            sizer.Add(subSizer, height == -1, (width == -1 and wx.EXPAND) | wx.ALL, self.MARGIN)
+        else:
+            sizer.Add(subSizer, width == -1, (height == -1 and wx.EXPAND) | wx.ALL, self.MARGIN)
+        return pic
+
+    def AddLineCtrl(self, sizer, label="", value="", width=-1, style=0, onInput=None, hint="", font=None, blend=False):
+        subSizer = wx.BoxSizer(wx.HORIZONTAL)
+        border = wx.BORDER_NONE if blend else wx.BORDER_SIMPLE
+        if hint:
+            text = UI.TextWithHint(self, hint=hint, value=value, size=wx.Size(width, self.LINE_HEIGHT), style=style | border)
+        else:
+            text = UI.Text(self, value=value, size=wx.Size(width, self.LINE_HEIGHT), style=style | border)
         if font is not None:
             text.SetFont(self.R["FONT_" + font] if isinstance(font, str) else font)
+        if blend:
+            text.SetBackgroundColour(self.R["COLOR_BG_L"])
         if label:
             name = wx.StaticText(self, label=label, size=wx.Size(self.LABEL_WIDTH, -1), style=wx.ST_ELLIPSIZE_END)
             name.Bind(wx.EVT_LEFT_DOWN, lambda evt: (text.SetFocus(), text.SelectAll()))

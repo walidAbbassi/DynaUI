@@ -215,12 +215,16 @@ class SectionHead(BaseControl):
 class StaticBitmap(BaseControl):
     def __init__(self, parent, pos=wx.DefaultPosition, size=wx.DefaultSize, bitmap=wx.NullBitmap, bg="L"):
         super().__init__(parent, pos=pos, size=size, bg=bg)
-        self.SetBitmap(bitmap if bitmap else wx.Bitmap(0, 0))
+        self.NullBitmap = wx.Bitmap(0, 0)
+        self.SetBitmap(bitmap or self.NullBitmap)
         if size is wx.DefaultSize:
             self.SetInitialSize(self.Bitmap.GetSize())
 
     def SetBitmap(self, bitmap):
         self.Bitmap = bitmap
+
+    def SetNullBitmap(self):
+        self.Bitmap = self.NullBitmap
 
     def OnPaint(self, evt):
         dc = wx.PaintDC(self)
