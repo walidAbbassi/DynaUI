@@ -17,11 +17,19 @@ class Tool(BaseControl):
     def __init__(self, parent, pos=wx.DefaultPosition, size=wx.DefaultSize, style=0,
                  orientation=wx.HORIZONTAL, itemSize=wx.Size(32, 32),
                  font=None, res=None, bg="D", fg="L", edge="V", async=False, fpsLimit=0):
-        super().__init__(parent=parent, pos=pos, size=size, style=style, font=font, res=res, bg=bg, fg=fg, edge=edge, async=async, fpsLimit=fpsLimit)
+        super().__init__(parent=parent, pos=pos, size=size or (itemSize[0] + 2, itemSize[1] + 2), style=style, font=font, res=res, bg=bg, fg=fg, edge=edge, async=async, fpsLimit=fpsLimit)
         self.SetSizer(wx.BoxSizer(orientation))
         self.SizerFlags1 = DefaultFlags1
         self.SizerFlags2 = DefaultFlags2
         self.ItemSize = itemSize
+        self._Tools = []
+
+    def SetItemSize(self, size):
+        self.ItemSize = size
+        for tool in self._Tools:
+            tool.SetInitialSize(size)
+        self.SetInitialSize(size + (2, 2))
+        self.GetParent().Layout()
 
     def AddItems(self, *items):
         frame = self.GetTopLevelParent()
@@ -38,6 +46,7 @@ class Tool(BaseControl):
                 tool.SetTip(frame.SetStatus)
                 sizer.Add(tool, self.SizerFlags2)
                 self[key] = tool
+                self._Tools.append(tool)
 
     def AddItemsWithHotKey(self, *items):
         frame = self.GetTopLevelParent()
@@ -54,13 +63,14 @@ class Tool(BaseControl):
                 tool.SetTip(frame.SetStatus)
                 sizer.Add(tool, self.SizerFlags2)
                 self[key] = tool
+                self._Tools.append(tool)
                 cmd = wx.NewId()
                 frame.Bind(wx.EVT_MENU, tool.Click, id=cmd)
                 frame.AcceleratorEntries.append(wx.AcceleratorEntry(flags=flags, keyCode=keyCode, cmd=cmd))
 
 
 class Info(BaseControl):
-    def __init__(self, parent, pos=wx.DefaultPosition, size=wx.Size(24, 24), style=0,
+    def __init__(self, parent, pos=wx.DefaultPosition, size=wx.DefaultSize, style=0,
                  orientation=wx.HORIZONTAL, main=True,
                  font=None, res=None, bg="D", fg="L", edge="V", async=False, fpsLimit=0):
         super().__init__(parent=parent, pos=pos, size=size, style=style, font=font, res=res, bg=bg, fg=fg, edge=edge, async=async, fpsLimit=fpsLimit)

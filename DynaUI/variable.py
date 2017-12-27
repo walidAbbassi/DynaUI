@@ -16,6 +16,10 @@ SETTINGS = {
     "SCROLL_MULTIPLIER": 10,
     "DLG_HEAD"         : 24,
     "DLG_HEAD_BTN"     : wx.Size(18, 18),
+    "DLG_MAIN_MARGIN"  : 4,
+    "DLG_MAIN_LABEL_W" : 80,
+    "DLG_MAIN_LINE_H"  : 24,
+    "DLG_MAIN_BUTTON_W": 80,
 }
 
 

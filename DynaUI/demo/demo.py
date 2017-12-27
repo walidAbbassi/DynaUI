@@ -32,6 +32,8 @@ class ExampleUI(wx.Frame):
         self.Info.AddItems((wx.StaticText(self.Info, label="status"), 0))
         items = (
             ("N", "TOOL_SETTING", self.ShowDialog), "|",
+            ("N", "TOOL_SETTING", (self.Tool.SetItemSize, wx.Size(64, 64))),
+            ("N", "TOOL_SETTING", (self.Tool.SetItemSize, wx.Size(32, 32))), "|",
             ("T", "TOOL_SETTING", None, {"toggle": 1, "res": "R"}), "|",
             ("B", "TOOL_SETTING", None, {"toggle": 1, "group": "whatever", "res": "X"}),
             ("B", "TOOL_SETTING", None, {"toggle": 0, "group": "whatever", "res": "Y"}),
@@ -166,6 +168,7 @@ class ExampleUI(wx.Frame):
 class Dialog(BaseMain):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+
         Sizer = wx.BoxSizer(wx.VERTICAL)
         self.SetSizer(Sizer)
         self.AddSectionHead(Sizer, tag="SectionHead", shape="C")
@@ -179,6 +182,9 @@ class Dialog(BaseMain):
         self.AddPickerValue(Sizer, label="PickerValue", choices=list("012345"), selected=2)
         self.AddSeparator(Sizer)
         self.AddPickerFile(Sizer, label="PickerFile")
+
+        # Sizer = wx.BoxSizer(wx.HORIZONTAL)
+        # self.SetSizer(Sizer)
         # Left = wx.BoxSizer(wx.VERTICAL)
         # Middle = wx.BoxSizer(wx.VERTICAL)
         # Right = wx.BoxSizer(wx.VERTICAL)

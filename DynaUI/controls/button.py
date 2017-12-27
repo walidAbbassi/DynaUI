@@ -14,9 +14,10 @@ __all__ = [
     "ButtonNormal", "ButtonToggle", "ButtonBundle",
     "ToolNormal", "ToolToggle", "ToolBundle", "ToolTypes",
     "PickerColor", "PickerDirection", "PickerFont", "PickerNumber", "PickerValue",
-    "Hider", "Sash", "Slider",
+    "Hider", "Sash", "Slider"
 ]
 
+# ======================================================= Button =======================================================
 BTN_STATE_IDLE = 1 << 0
 BTN_STATE_HOVER = 1 << 1
 BTN_STATE_CLICK = 1 << 2
@@ -29,32 +30,60 @@ BTN_CHANGE_HOVER_CLICK = BTN_STATE_HOVER | BTN_STATE_CLICK
 BTN_CHANGE_CLICK_HOVER = BTN_STATE_HOVER | BTN_STATE_CLICK | BTN_CHANGE_REVERSE
 
 
-# ======================================================= Button =======================================================
 class Button(BaseControl):
     def __init__(self, parent, pos=wx.DefaultPosition, size=wx.DefaultSize, style=0,
                  tag=None, pic=None, func=None,
                  font=None, res="D", bg="D", fg="L", edge="D", async=False, fpsLimit=0):
         super().__init__(parent=parent, pos=pos, size=size, style=style, font=font, res=res, bg=bg, fg=fg, edge=edge, async=async, fpsLimit=fpsLimit)
-        self.Func = func
-        self.Bind(wx.EVT_ENTER_WINDOW, lambda evt: (self.SetState(BTN_STATE_HOVER) if not self.HasCapture() else None, self.TipFunc(self.TipText if self.TipText else self.Tag)))
-        self.Bind(wx.EVT_LEAVE_WINDOW, lambda evt: self.SetState(BTN_STATE_IDLE) if not self.HasCapture() else None)
-        self.Bind(wx.EVT_LEFT_DOWN, lambda evt: (self.SetState(BTN_STATE_CLICK), Ab.Do(self.Func)))
-        self.Bind(wx.EVT_LEFT_DCLICK, lambda evt: (self.SetState(BTN_STATE_CLICK), Ab.Do(self.Func)))
-        self.Bind(wx.EVT_LEFT_UP, lambda evt: self.SetState((BTN_STATE_IDLE, BTN_STATE_HOVER)[wx.Rect(0, 0, *self.GetSize()).Contains(evt.GetPosition())]))
         self.Bind(wx.EVT_SIZE, self.OnSize)
+        self.Bind(wx.EVT_MOUSE_EVENTS, self.OnMouse)
+        self.Func = func
         self.SetTip(Ab.DoNothing)
 
-        self._ToDrawList = []
+        self._toDrawList = []
         self.InitTag(*tag if isinstance(tag, (tuple, list)) else (tag,))
         self.InitPic(*pic if isinstance(pic, (tuple, list)) else (pic,))
         self.Positioning()
 
-        self.State = BTN_STATE_IDLE
         self.Brush = self.Resources["00"]
         self.NewAnimation("ENTER", 25, "Brush", ("80", "FF"))
         self.NewAnimation("LEAVE", 25, "Brush", ("C0", "80", "40", "00"))
         self.NewAnimation("LEAVE_WHEN_CLICKED", 25, "Brush", ("40", "00"))
         self.NewAnimation("ENTER_THEN_LEAVE", 25, "Brush", ("FF", "FF", "FF", "FF", "FF", "C0", "80", "40", "00"))
+
+        self.state = BTN_STATE_IDLE
+        self.leftDown = False
+
+    def OnMouse(self, evt):
+        evtType = evt.GetEventType()
+        evtPos = evt.GetPosition()
+        if evtType == wx.wxEVT_LEFT_DOWN or evtType == wx.wxEVT_LEFT_DCLICK:
+            if not self.HasCapture(): self.CaptureMouse()
+            self.SetState(BTN_STATE_CLICK)
+            self.leftDown = True
+        elif evtType == wx.wxEVT_LEFT_UP:
+            if self.HasCapture(): self.ReleaseMouse()
+            if wx.Rect(0, 0, *self.GetSize()).Contains(evtPos):
+                self.SetState(BTN_STATE_HOVER)
+                self.OnClick()
+            else:
+                self.SetState(BTN_STATE_IDLE)
+            self.leftDown = False
+        elif evtType == wx.wxEVT_ENTER_WINDOW:
+            if not self.leftDown:
+                self.SetState(BTN_STATE_HOVER)
+            self.TipFunc(self.TipText or self.Tag)
+        elif evtType == wx.wxEVT_LEAVE_WINDOW and not self.leftDown:
+            if not self.leftDown:
+                self.SetState(BTN_STATE_IDLE)
+            self.TipFunc("")
+        evt.Skip()
+
+    def OnCaptureLost(self, evt):
+        self.leftDown = False
+
+    def OnClick(self):
+        Ab.Do(self.Func)
 
     def Click(self, evt=None):
         self.Play("ENTER_THEN_LEAVE")
@@ -67,7 +96,7 @@ class Button(BaseControl):
         self.SetTagOffset(x, y)
         self.TagXY = (0, 0)
         if tag is not None:
-            self._ToDrawList.append(self.DrawTag)
+            self._toDrawList.append(self.DrawTag)
 
     def InitPic(self, pic, pos="C", x=0, y=0):
         self.SetPic(pic, False)
@@ -75,7 +104,7 @@ class Button(BaseControl):
         self.SetPicOffset(x, y)
         self.PicXY = (0, 0)
         if pic is not None:
-            self._ToDrawList.append(self.DrawPic)
+            self._toDrawList.append(self.DrawPic)
 
     def SetTag(self, tag, reposition=True):
         self.Tag = tag
@@ -100,16 +129,16 @@ class Button(BaseControl):
         self.PicOffset = x, y
 
     def ShowTag(self, show):
-        if not show and self.DrawTag in self._ToDrawList:
-            self._ToDrawList.remove(self.DrawTag)
-        elif show and self.DrawTag not in self._ToDrawList:
-            self._ToDrawList.append(self.DrawTag)
+        if not show and self.DrawTag in self._toDrawList:
+            self._toDrawList.remove(self.DrawTag)
+        elif show and self.DrawTag not in self._toDrawList:
+            self._toDrawList.append(self.DrawTag)
 
     def ShowPic(self, show):
-        if not show and self.DrawPic in self._ToDrawList:
-            self._ToDrawList.remove(self.DrawPic)
-        elif show and self.DrawPic not in self._ToDrawList:
-            self._ToDrawList.append(self.DrawPic)
+        if not show and self.DrawPic in self._toDrawList:
+            self._toDrawList.remove(self.DrawPic)
+        elif show and self.DrawPic not in self._toDrawList:
+            self._toDrawList.append(self.DrawPic)
 
     def Positioning(self):
         w, h = self.GetSize()
@@ -150,9 +179,8 @@ class Button(BaseControl):
         self.TipText = text
 
     def SetState(self, state):
-        if not self.IsEnabled(): return
-        transition = self.State | state | [BTN_CHANGE_REVERSE, 0][self.State < state]
-        self.State = state
+        transition = self.state | state | [BTN_CHANGE_REVERSE, 0][self.state < state]
+        self.state = state
         if transition == BTN_CHANGE_IDLE_HOVER:
             self.Play("ENTER")
         elif transition == BTN_CHANGE_HOVER_IDLE:
@@ -181,13 +209,13 @@ class Button(BaseControl):
         dc.SetPen(wx.TRANSPARENT_PEN)
         dc.SetBrush(self.Brush)
         dc.DrawRectangle(0, 0, w, h)
-        for draw in self._ToDrawList:
+        for draw in self._toDrawList:
             draw(dc, w, h)
         if not self.IsEnabled():
             gc = wx.GraphicsContext.Create(dc)
             gc.SetBrush(self.R["BRUSH_DISABLED"])
             gc.DrawRectangle(0, 0, w, h)
-        if self.State == BTN_STATE_IDLE:
+        if self.state == BTN_STATE_IDLE:
             dc.SetPen(self.R["PEN_EDGE_L"])
             if self.Edge[0]: dc.DrawLine(0, 0, 0, h)
             if self.Edge[1]: dc.DrawLine(0, 0, w, 0)
@@ -221,6 +249,10 @@ class ButtonMixinToggle(object):
         self.Pic, self.Pic2 = self.Pic2, self.Pic
         self.Positioning()
 
+    def OnClick(self):
+        self.T()
+        Ab.Do(self.Func)
+
     def Click(self, evt=None):
         self.T()
         self.Play("ENTER" if self.Toggle else "LEAVE")
@@ -234,9 +266,8 @@ class ButtonMixinToggle(object):
         return self.Toggle
 
     def SetState(self, state):
-        if not self.IsEnabled(): return
-        transition = self.State | state | [BTN_CHANGE_REVERSE, 0][self.State < state]
-        self.State = state
+        transition = self.state | state | [BTN_CHANGE_REVERSE, 0][self.state < state]
+        self.state = state
         if self.Toggle:
             if transition == BTN_CHANGE_CLICK_IDLE:
                 self.Brush = self.Resources["FF"]
@@ -249,8 +280,6 @@ class ButtonMixinToggle(object):
             elif transition == BTN_CHANGE_CLICK_IDLE:
                 self.Play("LEAVE_WHEN_CLICKED")
         if state == BTN_STATE_CLICK:
-            self.SetFocus()
-            self.T()
             self.Brush = self.Resources["80"]
             self.ReDraw()
         elif transition == BTN_CHANGE_CLICK_HOVER:
@@ -268,6 +297,15 @@ class ButtonMixinBundle(object):
             self.GetParent().Groups[group] = []
         self.GetParent().Groups[group].append(self)
 
+    def OnClick(self):
+        if not self.Toggle:
+            self.Toggle = True
+            for tool in self.GetParent().Groups[self.Group]:
+                if tool != self and tool.Toggle:
+                    tool.Toggle = False
+                    tool.Play("LEAVE")
+        Ab.Do(self.Func)
+
     def Click(self, evt=None):
         if not self.Toggle:
             self.Toggle = True
@@ -282,9 +320,8 @@ class ButtonMixinBundle(object):
         return self.Toggle
 
     def SetState(self, state):
-        if not self.IsEnabled(): return
-        transition = self.State | state | [BTN_CHANGE_REVERSE, 0][self.State < state]
-        self.State = state
+        transition = self.state | state | [BTN_CHANGE_REVERSE, 0][self.state < state]
+        self.state = state
         if self.Toggle:
             if transition == BTN_CHANGE_CLICK_IDLE:
                 self.Brush = self.Resources["FF"]
@@ -297,15 +334,8 @@ class ButtonMixinBundle(object):
             elif transition == BTN_CHANGE_CLICK_IDLE:
                 self.Play("LEAVE_WHEN_CLICKED")
         if state == BTN_STATE_CLICK:
-            if not self.Toggle:
-                self.SetFocus()
-                self.Toggle = True
-                self.Brush = self.Resources["80"]
-                self.ReDraw()
-                for tool in self.GetParent().Groups[self.Group]:
-                    if tool != self and tool.Toggle:
-                        tool.Toggle = False
-                        tool.Play("LEAVE")
+            self.Brush = self.Resources["80"]
+            self.ReDraw()
         elif transition == BTN_CHANGE_CLICK_HOVER:
             self.Brush = self.Resources["FF"]
             self.ReDraw()
@@ -411,7 +441,7 @@ class PickerColor(Button):
         super().__init__(parent=parent, pos=pos, size=size, style=style, tag=tag, pic=pic, func=self.OnButton, font=font, res=res, bg=bg, fg=fg, edge=edge, async=async, fpsLimit=fpsLimit)
         self.Associate = associate
         self.AutoLabel = self.Tag == ""
-        self._ToDrawList.insert(0, self.DrawColor)
+        self._toDrawList.insert(0, self.DrawColor)
         self.SetValue(value)
 
     def DrawColor(self, dc, w, h):
@@ -480,23 +510,14 @@ class PickerDirection(Button):
         super().__init__(parent=parent, pos=pos, size=size, style=style, tag=tag, pic=pic, func=None, font=font, res=res, bg=bg, fg=fg, edge=edge, async=async, fpsLimit=fpsLimit)
         self.Associate = associate
         self.SetValue(value)
-        self.leftDown = False
-        self.Bind(wx.EVT_MOUSE_EVENTS, self.OnMouse)
 
     def OnMouse(self, evt):
-        evtType = evt.GetEventType()
-        if evtType == wx.wxEVT_LEFT_DOWN:
-            if not self.HasCapture(): self.CaptureMouse()
-            self.leftDown = True
-        elif evtType == wx.wxEVT_LEFT_UP:
-            if self.HasCapture(): self.ReleaseMouse()
-            self.leftDown = False
-        elif evtType == wx.wxEVT_MOTION and self.leftDown:
+        super().OnMouse(evt)
+        if evt.GetEventType() == wx.wxEVT_MOTION and self.leftDown:
             self.UpdateDirection(*evt.GetPosition())
-        elif evtType == wx.wxEVT_RIGHT_DOWN:
+        elif evt.GetEventType() == wx.wxEVT_RIGHT_DOWN:
             w, h = self.GetSize()
             self.UpdateDirection(w >> 1, h >> 1)
-        evt.Skip()
 
     def UpdateDirection(self, x, y):
         W, H = self.GetSize()
@@ -535,36 +556,31 @@ class PickerNumber(Button):  # TODO Wheel
                  tag="", pic=None,
                  font=None, res="D", bg="D", fg="L", edge="D", async=False, fpsLimit=0):
         super().__init__(parent=parent, pos=pos, size=size, style=style, tag=tag, pic=pic, func=None, font=font, res=res, bg=bg, fg=fg, edge=edge, async=async, fpsLimit=fpsLimit)
+        self.Bind(wx.EVT_MOUSEWHEEL, self.OnWheel)
         self.Associate = associate
         self.Old = value
         self.Number = value
         self.IsInt = isinstance(value, int)
         self.Range = vRange
         self.Base = vRange[0] if baseRange is None else baseRange
-        self.leftDown = False
-        self.LeftMotion = False
-        self.Bind(wx.EVT_MOUSE_EVENTS, self.OnMouse)
+        self.leftMotion = False
         self.StepX = int(wx.DisplaySize()[0] / max(self.Range[1] - self.Range[0], wx.DisplaySize()[0] / 100) / 1.5)
         self.StepY = wx.DisplaySize()[1] / 100
         self.SetTag("%s" % self.Number)
-        self._ToDrawList.insert(0, self.DrawGauge)
+        self._toDrawList.insert(0, self.DrawGauge)
 
     def OnMouse(self, evt):
+        super().OnMouse(evt)
         evtType = evt.GetEventType()
-        if evtType == wx.wxEVT_LEFT_DOWN or evtType == wx.wxEVT_LEFT_DCLICK:
-            if not self.HasCapture(): self.CaptureMouse()
-            self.leftDown = True
-        elif evtType == wx.wxEVT_LEFT_UP:
-            if self.HasCapture(): self.ReleaseMouse()
-            if not self.LeftMotion:
+        if evtType == wx.wxEVT_LEFT_UP:
+            if not self.leftMotion:
                 self.SetValue(min(self.Number + 1, self.Range[1]))
-            self.leftDown = False
-            self.LeftMotion = False
+            self.leftMotion = False
             self.Old = self.Number
             if self.Associate:
                 self.Associate(self.Number)
         elif evtType == wx.wxEVT_MOTION and self.leftDown:
-            self.LeftMotion = True
+            self.leftMotion = True
             self.UpdateNumber(*evt.GetPosition())
         elif evtType == wx.wxEVT_RIGHT_DOWN or evtType == wx.wxEVT_RIGHT_DCLICK:
             self.SetState(BTN_STATE_CLICK)
@@ -573,7 +589,12 @@ class PickerNumber(Button):  # TODO Wheel
             self.SetValue(max(self.Number - 1, self.Range[0]))
             if self.Associate:
                 self.Associate(self.Number)
-        evt.Skip()
+
+    def OnWheel(self, evt):
+        if evt.GetWheelRotation() > 0:
+            self.SetValue(min(self.Number + 1, self.Range[1]))
+        else:
+            self.SetValue(max(self.Number - 1, self.Range[0]))
 
     def DrawGauge(self, dc, w, h):
         dc.SetPen(wx.TRANSPARENT_PEN)
@@ -605,6 +626,7 @@ class PickerValue(ToolNormal):
                  font=None, res="D", bg="D", fg="L", edge="D", async=False, fpsLimit=0):
         super().__init__(parent=parent, pos=pos, size=size, style=style, showTag=True, tag=tag or ("", "L", 2), pics=pics or (parent.R["AP_TRIANGLE_D"], "R"), func=self.OnButton,
                          font=font, res=res, bg=bg, fg=fg, edge=edge, async=async, fpsLimit=fpsLimit)
+        self.Bind(wx.EVT_MOUSEWHEEL, self.OnWheel)
         self.edge = edge
         self.Associate = associate
         self.AutoLabel = self.Tag == ""
@@ -613,12 +635,24 @@ class PickerValue(ToolNormal):
         if selected != -1 and self.AutoLabel:
             self.SetTag(self.choices[self.selected])
 
+    def SetChoices(self, choices):
+        self.choices = choices
+        if self.AutoLabel:
+            self.SetTag("")
+            self.ReDraw()
+
+    def OnWheel(self, evt):
+        if evt.GetWheelRotation() > 0:
+            self.SetSelection(max(0, self.selected - 1))
+        else:
+            self.SetSelection(min(self.selected + 1, len(self.choices) - 1))
+
     def OnButton(self):
         size = wx.Size(self.GetSize()[0], min(400, (max(self.GetFont().GetPixelSize()[1], Ut.GetFontHeight(self)) + 4) * len(self.choices) + 2))
         d = Di.BaseMiniDialog(self, pos=self.GetScreenPosition() + (0, self.GetSize()[1] - 1), size=size, main=ListCtrl, data=[(i,) for i in self.choices], width=(-1,), edge=self.edge)
         d.Main.SetSelection(self.selected)
         d.Main.Bind(wx.EVT_KILL_FOCUS, lambda evt: d.Play("FADEOUT"))
-        d.Main.OnSelection = lambda: (self.SetSelection(d.Main.GetSelection()), d.Play("FADEOUT"))
+        d.Main.OnSelection = lambda: (self.SetSelection(d.Main.GetSelection()), d.Play("FADEOUT"), self.SetFocus())
         d.Play("FADEIN")
 
     def GetSelection(self):
@@ -627,10 +661,10 @@ class PickerValue(ToolNormal):
     def SetSelection(self, selected):
         self.selected = selected
         if self.Associate:
-            self.Associate(self.choices[self.selected])
+            self.Associate(self.selected)
         if self.AutoLabel:
             self.SetTag(self.choices[self.selected])
-        self.ReDraw()
+            self.ReDraw()
 
     def GetValue(self):
         return self.choices[self.selected]
@@ -678,11 +712,9 @@ class Sash(ToolNormal):
             self.dimension = 1
             self.cursor = parent.R["CURSOR_SASH_V"]
         super().__init__(parent=parent, size=size, pics=pics, func=parent.Layout if func is None else func, font=font, res=res, bg=bg, fg=fg, edge=edge)
-        self.Bind(wx.EVT_MOUSE_EVENTS, self.OnMouse)
         self.Target = target
         self.multiplier = {"L": 1, "R": -1, "T": 1, "B": -1}[direction]
         self.leftPos = None
-        self.leftDown = False
         self.sizeRect = None
         self.sizeNew = None
         clipMin = vRange[0] >= 0
@@ -707,16 +739,13 @@ class Sash(ToolNormal):
             self.sizeRect.SetTransparent(t)
 
     def OnMouse(self, evt):
+        super().OnMouse(evt)
         evtType = evt.GetEventType()
         evtPos = evt.GetPosition()
         if evtType == wx.wxEVT_LEFT_DOWN or evtType == wx.wxEVT_LEFT_DCLICK:
-            if not self.HasCapture(): self.CaptureMouse()
             self.leftPos = evtPos[self.dimension]
-            self.leftDown = True
         elif evtType == wx.wxEVT_LEFT_UP:
-            if self.HasCapture(): self.ReleaseMouse()
             self.leftPos = None
-            self.leftDown = False
             self.SetCursor(self.R["CURSOR_NORMAL"])
             if self.sizeRect:
                 self.Target.SetInitialSize(self.sizeNew)
@@ -742,7 +771,6 @@ class Sash(ToolNormal):
             self.SetCursor(self.cursor)
         elif evtType == wx.wxEVT_LEAVE_WINDOW and not self.leftDown:
             self.SetCursor(self.R["CURSOR_NORMAL"])
-        evt.Skip()
 
     def OnCaptureLost(self, evt):
         self.leftPos = None
@@ -757,10 +785,6 @@ class Slider(Button):
                  associate=None, value=50, domain=(0, 100), step=1):
         super().__init__(parent=parent, pos=pos, size=wx.Size(size[0], (40 if drawLabel else 20) if size[1] == -1 else size[1]), res="B", bg="D", fg="D", edge="BE", fpsLimit=240)
         self.SetBackgroundColour(parent.GetBackgroundColour())
-        self.Unbind(wx.EVT_LEFT_DOWN)
-        self.Unbind(wx.EVT_LEFT_UP)
-        self.Unbind(wx.EVT_LEFT_DCLICK)
-        self.Bind(wx.EVT_MOUSE_EVENTS, self.OnMouse)
         self.Bind(wx.EVT_MOUSEWHEEL, self.OnWheel)
         self.Associate = associate
         self.drawLabel = drawLabel
@@ -771,7 +795,6 @@ class Slider(Button):
         self.label1 = str(self.domain[0])
         self.label2 = str(self.domain[1])
         self.labelV = str(value)
-        self.leftDown = False
         self.leftPos = None
         self.Render()
 
@@ -796,21 +819,17 @@ class Slider(Button):
         dc.DrawBitmap(self.R["BITMAP_SLIDER"], l, self.offsetY - 2)
 
     def OnMouse(self, evt):
+        super().OnMouse(evt)
         evtType = evt.GetEventType()
         x = max(min(evt.GetPosition()[0] - 4, self.barW), 0)
         if evtType == wx.wxEVT_LEFT_DOWN or evtType == wx.wxEVT_LEFT_DCLICK:
-            if not self.HasCapture(): self.CaptureMouse()
-            self.leftDown = True
             self.leftPos = x
             self.UpdateValue(x)
         elif evtType == wx.wxEVT_LEFT_UP:
-            if self.HasCapture(): self.ReleaseMouse()
-            self.leftDown = False
             self.leftPos = None
         elif evtType == wx.wxEVT_MOTION and self.leftDown:
             self.leftPos = x
             self.UpdateValue(x)
-        evt.Skip()
         self.ReDraw()
 
     def OnCaptureLost(self, evt):

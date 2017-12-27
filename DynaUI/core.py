@@ -25,28 +25,22 @@ class BaseControl(wx.Control):
         self.R = parent.R
         self.S = parent.S
         self.L = parent.L
-        if font is not None:  # Font inherit by default
-            self.SetFont(self.R["FONT_" + font] if isinstance(font, str) else font)
-        self.res = res
-        self.Resources = self.R["BRUSH_SET_" + res] if isinstance(res, str) else res
-        self.SetBackgroundColour(self.R["COLOR_BG_" + bg] if isinstance(bg, str) else bg)
-        self.SetForegroundColour(self.R["COLOR_FG_" + fg] if isinstance(fg, str) else fg)
-        self.BackgroundBrush = self.R["BRUSH_BG_" + bg] if isinstance(bg, str) else bg
-        self.ForegroundBrush = self.R["BRUSH_FG_" + fg] if isinstance(fg, str) else fg
-        if isinstance(edge, str) or edge is None:
-            edge = MAPPING_EDGE[edge]
-        self.Edge = ["L" in edge[0], "T" in edge[0], "R" in edge[0], "B" in edge[0], "L" in edge[1], "T" in edge[1], "R" in edge[1], "B" in edge[1]]
+        self.Timers = {}
+        self.Animations = {}
+        self.Params = {"FONT" : None, "RES": None, "BG": None, "FG": None, "EDGE": None,
+                       "ASYNC": async, "FPS_LIMIT": fpsLimit, "Interval": None}
+        self.SetFont(font)
+        self.SetRes(res)
+        self.SetBG(bg)
+        self.SetFG(fg)
+        self.SetEdge(edge)
         self.SetBackgroundStyle(wx.BG_STYLE_PAINT)
         self.Bind(wx.EVT_PAINT, self.OnPaint)
         self.Bind(wx.EVT_MOUSE_CAPTURE_LOST, self.OnCaptureLost)
         self.Bind(wx.EVT_WINDOW_DESTROY, self.OnDestroy)  # Is there a better way to clean up the timer?
         self.Bind(wx.EVT_TIMER, lambda evt: Ab.Do(evt.GetTimer().func))
-        self._async = async
-        self._fpsLimit = fpsLimit
-        self.Timers = {}
-        self.Animations = {}
         if fpsLimit:
-            self.Interval = 1000 // min(fpsLimit, 240)
+            self.Params["Interval"] = 1000 // min(fpsLimit, 240)
             self.NewTimer("_", self.DoRefresh)
             self._needReDraw = False
         else:
@@ -106,8 +100,9 @@ class BaseControl(wx.Control):
         self.Timers[name].func = self.Animations[name].Update
 
     def Play(self, name, sequence=None, repeat=None):
-        if not self._async:
-            self.Stop()
+        if not self.Params["ASYNC"]:
+            for a in self.Animations:
+                self.Animations[a].Stop()
         self.Animations[name].Play(sequence, repeat)
 
     def Pause(self, name, frames=-1):
@@ -127,10 +122,32 @@ class BaseControl(wx.Control):
         else:
             self.Animations[name].Prepare()
 
-    def ChangeResources(self, res):
-        self.res = res
+    # Parameters
+    def SetFont(self, font):
+        self.Params["FONT"] = font
+        if font is not None:  # Font inherit by default
+            super().SetFont(self.R["FONT_" + font] if isinstance(font, str) else font)
+
+    def SetBG(self, bg):
+        self.Params["BG"] = bg
+        self.SetBackgroundColour(self.R["COLOR_BG_" + bg] if isinstance(bg, str) else bg)
+        self.BackgroundBrush = self.R["BRUSH_BG_" + bg] if isinstance(bg, str) else bg
+
+    def SetFG(self, fg):
+        self.Params["FG"] = fg
+        self.SetForegroundColour(self.R["COLOR_FG_" + fg] if isinstance(fg, str) else fg)
+        self.ForegroundBrush = self.R["BRUSH_FG_" + fg] if isinstance(fg, str) else fg
+
+    def SetRes(self, res):
+        self.Params["RES"] = res
         self.Resources = self.R["BRUSH_SET_" + res] if isinstance(res, str) else res
         self.Prepare()
+
+    def SetEdge(self, edge):
+        self.Params["EDGE"] = edge
+        if isinstance(edge, str) or edge is None:
+            edge = MAPPING_EDGE[edge]
+        self.Edge = ["L" in edge[0], "T" in edge[0], "R" in edge[0], "B" in edge[0], "L" in edge[1], "T" in edge[1], "R" in edge[1], "B" in edge[1]]
 
     # Refresh with limited fps
     def ReDraw(self):
@@ -139,7 +156,7 @@ class BaseControl(wx.Control):
         else:
             self.Refresh()
             self._needReDraw = False
-            self.Timers["_"].Start(self.Interval, wx.TIMER_ONE_SHOT)
+            self.Timers["_"].Start(self.Params["Interval"], wx.TIMER_ONE_SHOT)
 
     def DoRefresh(self):
         if self._needReDraw:

@@ -85,8 +85,8 @@ class TextWithHint(wx.TextCtrl):  # Only GetValue/SetValue/AppendText are reimpl
 
 # =================================================== Miscellaneous ====================================================
 class Separator(BaseControl):
-    def __init__(self, parent, pos=wx.DefaultPosition, size=wx.Size(2, 2), orientation=wx.VERTICAL, bg="L"):
-        super().__init__(parent, pos=pos, size=size, bg=bg)
+    def __init__(self, parent, pos=wx.DefaultPosition, size=wx.Size(2, 2), orientation=wx.VERTICAL):
+        super().__init__(parent, pos=pos, size=size)
         self.Bind(wx.EVT_PAINT, self.OnPaintV if orientation == wx.VERTICAL else self.OnPaintH)
 
     def OnPaintV(self, evt):

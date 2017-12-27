@@ -360,10 +360,6 @@ class ListCtrl(Scrolled):
         if auto:
             self.SetActualSize()
 
-    def SetFont(self, font):
-        super().SetFont(font)
-        self.SetLineHeight()
-
     def UpdateCoords(self):
         self.Coords = []
         for x in self.CoordsX:
