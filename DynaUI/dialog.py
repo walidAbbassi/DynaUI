@@ -30,6 +30,8 @@ class BaseMain(BaseControl):
         return name
 
     def _AddSubSizer(self, sizer, orientation=wx.HORIZONTAL, w=0, h=0):
+        if self.LABEL_WIDTH == -1:
+            w = h = -1
         subSizer = wx.BoxSizer(orientation)
         if sizer.GetOrientation() == wx.VERTICAL:
             sizer.Add(subSizer, h == -1, (w == -1 and wx.EXPAND) | wx.ALL, self.MARGIN)
@@ -63,9 +65,10 @@ class BaseMain(BaseControl):
         subSizer.Add(button, width == -1)
         return button
 
-    def AddButtonBundle(self, sizer, label="", tags=(), width=None, rows=1, toggled=0, group="", onClick=None, **kwargs):
+    def AddButtonBundle(self, sizer, label="", choices=(), width=None, rows=1, selected=-1, group=None, onClick=None, **kwargs):
         width = width or self.BUTTON_WIDTH
-        bPerRow = (len(tags) + rows - 1) // rows
+        bPerRow = (len(choices) + rows - 1) // rows
+        group = group or Ut.GetRandomName(exclude=self.Groups.keys())
         subSizers = [wx.BoxSizer(wx.HORIZONTAL) for i in range(rows)]
         if label:
             self._AddLabel(subSizers[0], label)
@@ -73,8 +76,8 @@ class BaseMain(BaseControl):
                 s.Add(self.LABEL_WIDTH, -1, 0, wx.ALIGN_CENTER)
                 s.Add(self.MARGIN * 2, self.MARGIN)
         buttons = []
-        for index, tag in enumerate(tags):
-            button = UI.ButtonBundle(self, size=wx.Size(width, self.LINE_HEIGHT), tag=tag, func=onClick, edge="L", toggle=index == toggled, group=group, **kwargs)
+        for index, tag in enumerate(choices):
+            button = UI.ButtonBundle(self, size=wx.Size(width, self.LINE_HEIGHT), tag=tag, func=onClick, edge="L", toggle=index == selected, group=group, **kwargs)
             subSizers[index // bPerRow].Add(button, width == -1)
             buttons.append(button)
         subSizer = self._AddSubSizer(sizer, orientation=wx.VERTICAL, w=width)
@@ -167,12 +170,12 @@ class BaseMain(BaseControl):
         return text
 
     # --------------------------
-    def AddListBox(self, sizer, label="", choices=(), selected=-1, width=-1, height=-1, onClick=None, onDClick=None, inline=True):
+    def AddListBox(self, sizer, label="", choices=(), selected=-1, width=-1, height=-1, onClick=None, onDClick=None, inline=True, font=None):
         if label:
             name = wx.StaticText(self, label=label, size=wx.Size(self.LABEL_WIDTH, -1 if inline else self.LINE_HEIGHT), style=wx.ST_ELLIPSIZE_END)
         else:
             name = None
-        listbox = UI.ListCtrl(self, data=[(i,) for i in choices], size=wx.Size(width, height), width=(-1,), edge="L")
+        listbox = UI.ListCtrl(self, data=[(i,) for i in choices], size=wx.Size(width, height), width=(-1,), edge="L", font=font)
         listbox.SetSelection(selected)
         listbox.OnSelection = onClick or Ab.DoNothing
         listbox.OnActivation = onDClick or Ab.DoNothing
@@ -211,7 +214,8 @@ class BaseMain(BaseControl):
         return text
 
     # --------------------------
-    def AddStdButton(self, sizer, size=wx.Size(40, 20), onOK=None, onCancel=None, onApply=None):
+    def AddStdButton(self, sizer, size=None, onOK=None, onCancel=None, onApply=None):
+        size = size or wx.Size(60, self.LINE_HEIGHT)
         if onOK is not None:
             self[1] = UI.ToolNormal(self, size=size, pics=self.R["AP_CHECK"], edge="D", func=onOK)
         if onCancel is not None:
@@ -473,7 +477,10 @@ class BaseDialog(wx.Frame):
         self.Refresh()
 
     def OnClose(self):
-        self.Play("FADEOUT")
+        if hasattr(self.Main, "OnClose"):
+            self.Main.OnClose()
+        else:
+            self.Play("FADEOUT")
 
 
 # =================================================== BaseMiniDialog ===================================================

@@ -368,14 +368,15 @@ class Bundled(object):
     def __getitem__(self, item):
         return self.buttons[item]
 
-    def GetToggled(self):
+    def GetSelection(self):
         for index, b in enumerate(self.buttons):
             if b.IsToggled():
                 return index
         return -1
 
-    def SetToggled(self, index):
-        self.buttons[index].Click()
+    def SetSelection(self, index):
+        if self.GetSelection() != index:
+            self.buttons[index].Click()
 
 
 ButtonTypes = {"N": ButtonNormal, "T": ButtonToggle, "B": ButtonBundle}

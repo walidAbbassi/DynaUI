@@ -2,6 +2,8 @@
 
 import os
 import time
+import string
+import random
 import hashlib
 import wx
 
@@ -17,6 +19,7 @@ __all__ = [
     "EnsureWindowInScreen",
     "CreateRandomDirectory",
     "FindOrCreateDirectory",
+    "GetRandomName",
     "ShowSaveFileDialog",
     "ShowOpenFileDialog",
     "ShowSimpleMessageDialog",
@@ -143,6 +146,13 @@ def FindOrCreateDirectory(path):
         return True
     except Exception:
         return False
+
+
+def GetRandomName(size=12, chars=string.ascii_letters + string.digits, exclude=()):
+    while True:
+        name = "".join(random.choice(chars) for _ in range(size))
+        if name not in exclude:
+            return name
 
 
 # ----------------------------------------------------------
