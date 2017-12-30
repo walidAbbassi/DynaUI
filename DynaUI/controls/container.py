@@ -8,20 +8,24 @@ from .miscellaneous import Separator
 
 __all__ = ["Tool", "Info"]
 
-DefaultFlags1 = wx.SizerFlags().Expand().Border(wx.ALL, 1)
-DefaultFlags2 = wx.SizerFlags().Center().Border(wx.ALL, 1)
-DefaultFlags3 = wx.SizerFlags().Center().Border(wx.ALL, 1).Proportion(1)
-
 
 class Tool(BaseControl):
     def __init__(self, parent, pos=wx.DefaultPosition, size=wx.DefaultSize, style=0,
-                 orientation=wx.HORIZONTAL, itemSize=wx.Size(32, 32),
+                 orientation=wx.HORIZONTAL, itemSize=wx.Size(32, 32), itemSpace=1,
                  font=None, res=None, bg="D", fg="L", edge="V", async=False, fpsLimit=0):
-        super().__init__(parent=parent, pos=pos, size=size or (itemSize[0] + 2, itemSize[1] + 2), style=style, font=font, res=res, bg=bg, fg=fg, edge=edge, async=async, fpsLimit=fpsLimit)
-        self.SetSizer(wx.BoxSizer(orientation))
-        self.SizerFlags1 = DefaultFlags1
-        self.SizerFlags2 = DefaultFlags2
+        size = size or (itemSize[0] + max(itemSpace, 1) * 2, itemSize[1] + max(itemSpace, 1) * 2)
+        super().__init__(parent=parent, pos=pos, size=size, style=style, font=font, res=res, bg=bg, fg=fg, edge=edge, async=async, fpsLimit=fpsLimit)
+        sizer = wx.BoxSizer(orientation)
+        sizer.Add(1, 1)
+        self.SetSizer(sizer)
         self.ItemSize = itemSize
+        if itemSpace < 1:
+            o = (wx.TOP | wx.BOTTOM) if orientation == wx.HORIZONTAL else (wx.LEFT | wx.RIGHT)
+            self.SizerFlags1 = wx.SizerFlags().Expand().Border(o, 1)
+            self.SizerFlags2 = wx.SizerFlags().Center().Border(o, 1)
+        else:
+            self.SizerFlags1 = wx.SizerFlags().Expand().Border(wx.ALL, itemSpace)
+            self.SizerFlags2 = wx.SizerFlags().Center().Border(wx.ALL, itemSpace)
         self._Tools = []
 
     def SetItemSize(self, size):
@@ -47,6 +51,7 @@ class Tool(BaseControl):
                 sizer.Add(tool, self.SizerFlags2)
                 self[key] = tool
                 self._Tools.append(tool)
+        sizer.Add(1, 1)
 
     def AddItemsWithHotKey(self, *items):
         frame = self.GetTopLevelParent()
@@ -67,17 +72,18 @@ class Tool(BaseControl):
                 cmd = wx.NewId()
                 frame.Bind(wx.EVT_MENU, tool.Click, id=cmd)
                 frame.AcceleratorEntries.append(wx.AcceleratorEntry(flags=flags, keyCode=keyCode, cmd=cmd))
+        sizer.Add(1, 1)
 
 
 class Info(BaseControl):
-    def __init__(self, parent, pos=wx.DefaultPosition, size=wx.DefaultSize, style=0,
+    def __init__(self, parent, pos=wx.DefaultPosition, size=wx.Size(24, 24), style=0,
                  orientation=wx.HORIZONTAL, main=True,
                  font=None, res=None, bg="D", fg="L", edge="V", async=False, fpsLimit=0):
         super().__init__(parent=parent, pos=pos, size=size, style=style, font=font, res=res, bg=bg, fg=fg, edge=edge, async=async, fpsLimit=fpsLimit)
         self.SetSizer(wx.BoxSizer(orientation))
-        self.SizerFlags1 = DefaultFlags1
-        self.SizerFlags2 = DefaultFlags2
-        self.SizerFlags3 = DefaultFlags3
+        self.SizerFlags1 = wx.SizerFlags().Expand().Border(wx.ALL, 1)
+        self.SizerFlags2 = wx.SizerFlags().Center().Border(wx.ALL, 1)
+        self.SizerFlags3 = wx.SizerFlags().Center().Border(wx.ALL, 1).Proportion(1)
         if main:
             self.GetTopLevelParent().SetStatus = self.SetStatus
 

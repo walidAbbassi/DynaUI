@@ -333,6 +333,11 @@ class ListCtrl(Scrolled):
 
         self.drawColumn = drawColumn
 
+    def SetChoices(self, choices):
+        self.data = [(i,) for i in choices]
+        self.Selection = -1
+        self.SetActualSize()
+
     def SetData(self, data):
         self.data = data
         self.Selection = -1
@@ -346,6 +351,10 @@ class ListCtrl(Scrolled):
 
     def SetOrder(self, order):
         self.order = range(len(self.width)) if order is None else order
+
+    def SetFont(self, font):
+        super().SetFont(font)
+        self.SetLineHeight()
 
     def SetLineHeight(self, lineheight=None, auto=True):  # Call SetActualSize immediately after this
         if lineheight is None:

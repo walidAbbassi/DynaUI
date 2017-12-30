@@ -2,6 +2,7 @@
 
 
 import wx
+import webbrowser
 from ..core import BaseControl
 from .. import dialog as Di
 from .. import abstract as Ab
@@ -14,7 +15,7 @@ __all__ = [
     "ButtonNormal", "ButtonToggle", "ButtonBundle",
     "ToolNormal", "ToolToggle", "ToolBundle", "ToolTypes",
     "PickerColor", "PickerDirection", "PickerFont", "PickerNumber", "PickerValue",
-    "Hider", "Sash", "Slider"
+    "Hider", "Sash", "Slider", "HyperLink",
 ]
 
 # ======================================================= Button =======================================================
@@ -232,7 +233,7 @@ class Button(BaseControl):
         evt.Skip()
 
 
-# Mix-ins
+# ---- Mix-ins ----
 class ButtonMixinToggle(object):
     def __init__(self, toggle, tag2=None, pic2=None):
         self.Toggle = toggle
@@ -432,14 +433,13 @@ ToolTypes = {"N": ToolNormal, "T": ToolToggle, "B": ToolBundle}
 
 
 # ---- Pickers ----
-# When a value is picked, they pass it to the associated function
-# GetValue / SetValue
+# When a value is picked, they pass it to the associated function (if provided)
 class PickerColor(Button):
     def __init__(self, parent, pos=wx.DefaultPosition, size=wx.DefaultSize, style=0,
                  associate=None, value="#000000",
                  tag="", pic=None,
-                 font=None, res="D", bg="D", fg="L", edge=None, async=False, fpsLimit=0):
-        super().__init__(parent=parent, pos=pos, size=size, style=style, tag=tag, pic=pic, func=self.OnButton, font=font, res=res, bg=bg, fg=fg, edge=edge, async=async, fpsLimit=fpsLimit)
+                 font=None, res="D", bg="D", fg="L", edge=None):
+        super().__init__(parent=parent, pos=pos, size=size, style=style, tag=tag, pic=pic, func=self.OnButton, font=font, res=res, bg=bg, fg=fg, edge=edge)
         self.Associate = associate
         self.AutoLabel = self.Tag == ""
         self._toDrawList.insert(0, self.DrawColor)
@@ -474,8 +474,8 @@ class PickerFont(Button):
     def __init__(self, parent, pos=wx.DefaultPosition, size=wx.DefaultSize, style=0,
                  associate=None, value=None,
                  tag="", pic=None,
-                 font=None, res="D", bg="D", fg="L", edge="D", async=False, fpsLimit=0):
-        super().__init__(parent=parent, pos=pos, size=size, style=style, tag=tag, pic=pic, func=self.OnButton, font=font, res=res, bg=bg, fg=fg, edge=edge, async=async, fpsLimit=fpsLimit)
+                 font=None, res="D", bg="D", fg="L", edge="D"):
+        super().__init__(parent=parent, pos=pos, size=size, style=style, tag=tag, pic=pic, func=self.OnButton, font=font, res=res, bg=bg, fg=fg, edge=edge)
         self.Associate = associate
         self.AutoLabel = self.Tag == ""
         self.SetValue(value if value else self.GetFont())
@@ -507,8 +507,8 @@ class PickerDirection(Button):
     def __init__(self, parent, pos=wx.DefaultPosition, size=wx.DefaultSize, style=0,
                  associate=None, value="CC",
                  tag="[+]", pic=None,
-                 font=None, res="D", bg="D", fg="L", edge="D", async=False, fpsLimit=0):
-        super().__init__(parent=parent, pos=pos, size=size, style=style, tag=tag, pic=pic, func=None, font=font, res=res, bg=bg, fg=fg, edge=edge, async=async, fpsLimit=fpsLimit)
+                 font=None, res="D", bg="D", fg="L", edge="D"):
+        super().__init__(parent=parent, pos=pos, size=size, style=style, tag=tag, pic=pic, func=None, font=font, res=res, bg=bg, fg=fg, edge=edge)
         self.Associate = associate
         self.SetValue(value)
 
@@ -555,8 +555,8 @@ class PickerNumber(Button):  # TODO Wheel
     def __init__(self, parent, pos=wx.DefaultPosition, size=wx.DefaultSize, style=0,
                  associate=None, value=0, vRange=(0, 5), baseRange=None,
                  tag="", pic=None,
-                 font=None, res="D", bg="D", fg="L", edge="D", async=False, fpsLimit=0):
-        super().__init__(parent=parent, pos=pos, size=size, style=style, tag=tag, pic=pic, func=None, font=font, res=res, bg=bg, fg=fg, edge=edge, async=async, fpsLimit=fpsLimit)
+                 font=None, res="D", bg="D", fg="L", edge="D"):
+        super().__init__(parent=parent, pos=pos, size=size, style=style, tag=tag, pic=pic, func=None, font=font, res=res, bg=bg, fg=fg, edge=edge)
         self.Bind(wx.EVT_MOUSEWHEEL, self.OnWheel)
         self.Associate = associate
         self.Old = value
@@ -624,9 +624,9 @@ class PickerValue(ToolNormal):
     def __init__(self, parent, pos=wx.DefaultPosition, size=wx.DefaultSize, style=0,
                  associate=None, selected=-1, choices=(),
                  tag="", pics=None,
-                 font=None, res="D", bg="D", fg="L", edge="D", async=False, fpsLimit=0):
+                 font=None, res="D", bg="D", fg="L", edge="D"):
         super().__init__(parent=parent, pos=pos, size=size, style=style, showTag=True, tag=tag or ("", "L", 2), pics=pics or (parent.R["AP_TRIANGLE_D"], "R"), func=self.OnButton,
-                         font=font, res=res, bg=bg, fg=fg, edge=edge, async=async, fpsLimit=fpsLimit)
+                         font=font, res=res, bg=bg, fg=fg, edge=edge)
         self.Bind(wx.EVT_MOUSEWHEEL, self.OnWheel)
         self.edge = edge
         self.Associate = associate
@@ -650,9 +650,9 @@ class PickerValue(ToolNormal):
 
     def OnButton(self):
         size = wx.Size(self.GetSize()[0], min(400, (max(self.GetFont().GetPixelSize()[1], Ut.GetFontHeight(self)) + 4) * len(self.choices) + 2))
-        d = Di.BaseMiniDialog(self, pos=self.GetScreenPosition() + (0, self.GetSize()[1] - 1), size=size, main=ListCtrl, data=[(i,) for i in self.choices], width=(-1,), edge=self.edge)
+        d = Di.BaseMiniDialog(invoker=self, pos=self.GetScreenPosition() + (0, self.GetSize()[1] - 1), size=size, main=ListCtrl, data=[(i,) for i in self.choices], width=(-1,), edge=self.edge)
         d.Main.SetSelection(self.selected)
-        d.Main.Bind(wx.EVT_KILL_FOCUS, lambda evt: d.Play("FADEOUT"))
+        d.Main.Bind(wx.EVT_KILL_FOCUS, lambda evt: (d.Play("FADEOUT"), self.SetFocus()))
         d.Main.OnSelection = lambda: (self.SetSelection(d.Main.GetSelection()), d.Play("FADEOUT"), self.SetFocus())
         d.Play("FADEIN")
 
@@ -674,9 +674,9 @@ class PickerValue(ToolNormal):
         self.SetSelection(self.choices.index(value))
 
 
-# Misc Buttons
+# ---- Misc Buttons ----
 class Hider(ToolNormal):
-    def __init__(self, parent, targets, orientation="V", func=Ab.DoNothing, font="I", res="L", bg="L", fg="D", edge=None):
+    def __init__(self, parent, targets, orientation="V", func=Ab.DoNothing, font=None, res="L", bg="L", fg="D", edge=None):
         self.orientation = orientation
         if self.orientation == "V":
             size = wx.Size(4, -1)
@@ -781,7 +781,7 @@ class Sash(ToolNormal):
         self.SetCursor(self.R["CURSOR_NORMAL"])
 
 
-class Slider(Button):
+class Slider(Button):  # TODO rework
     def __init__(self, parent, pos=wx.DefaultPosition, size=(112, -1), drawLabel=True,
                  associate=None, value=50, domain=(0, 100), step=1):
         super().__init__(parent=parent, pos=pos, size=wx.Size(size[0], (40 if drawLabel else 20) if size[1] == -1 else size[1]), res="B", bg="D", fg="D", edge="BE", fpsLimit=240)
@@ -870,3 +870,17 @@ class Slider(Button):
         mdc.DrawLine(0, 0, 0, h)
         mdc.DrawLine(0, 0, w, 0)
         mdc.SelectObject(wx.NullBitmap)
+
+
+class HyperLink(ToolNormal):
+    def __init__(self, parent, pos=wx.DefaultPosition, size=wx.DefaultSize, style=0,
+                 tag=None, pics=None, url="", showTag=True,
+                 font="U", res="L", bg="D", fg="#40c0ff", edge=None):
+        super().__init__(parent=parent, pos=pos, size=size, style=style, tag=tag, pics=pics, func=self.OnUrl, showTag=showTag, font=font, res=res, bg=bg, fg=fg, edge=edge)
+        self.url = url
+
+    def OnUrl(self):
+        try:
+            webbrowser.open(self.url)
+        except Exception:
+            pass

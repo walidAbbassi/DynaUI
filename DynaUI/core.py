@@ -4,7 +4,7 @@
 import wx
 from . import abstract as Ab
 
-__all__ = ["BaseControl"]
+__all__ = ["BaseControl", "DynaUIMixin"]
 
 MAPPING_EDGE = {
     None: ("", ""),
@@ -21,7 +21,7 @@ MAPPING_EDGE = {
 class BaseControl(wx.Control):
     def __init__(self, parent, pos=wx.DefaultPosition, size=wx.DefaultSize, style=0,
                  font=None, res=None, bg="L", fg="L", edge=None, async=False, fpsLimit=0):
-        super().__init__(parent, pos=pos, size=size, style=wx.BORDER_NONE | style)
+        super().__init__(parent, pos=pos, size=size, style=style | wx.BORDER_NONE)
         self.R = parent.R
         self.S = parent.S
         self.L = parent.L
@@ -29,18 +29,18 @@ class BaseControl(wx.Control):
         self.Animations = {}
         self.Params = {"FONT" : None, "RES": None, "BG": None, "FG": None, "EDGE": None,
                        "ASYNC": async, "FPS_LIMIT": fpsLimit, "Interval": None}
-        self.SetFont(font)
-        self.SetRes(res)
+        self.SetFONT(font)
+        self.SetRES(res)
         self.SetBG(bg)
         self.SetFG(fg)
-        self.SetEdge(edge)
+        self.SetEDGE(edge)
         self.SetBackgroundStyle(wx.BG_STYLE_PAINT)
         self.Bind(wx.EVT_PAINT, self.OnPaint)
-        self.Bind(wx.EVT_MOUSE_CAPTURE_LOST, self.OnCaptureLost)
         self.Bind(wx.EVT_WINDOW_DESTROY, self.OnDestroy)  # Is there a better way to clean up the timer?
+        self.Bind(wx.EVT_MOUSE_CAPTURE_LOST, self.OnCaptureLost)
         self.Bind(wx.EVT_TIMER, lambda evt: Ab.Do(evt.GetTimer().func))
         if fpsLimit:
-            self.Params["Interval"] = 1000 // min(fpsLimit, 240)
+            self.Params["Interval"] = 1000 // min(fpsLimit, 120)
             self.NewTimer("_", self.DoRefresh)
             self._needReDraw = False
         else:
@@ -56,6 +56,9 @@ class BaseControl(wx.Control):
 
     def __contains__(self, item):
         return self._Controls.__contains__(item)
+
+    def __iter__(self):
+        return self._Controls.__iter__()
 
     def OnDestroy(self, evt):
         for timer in self.Timers:
@@ -123,27 +126,27 @@ class BaseControl(wx.Control):
             self.Animations[name].Prepare()
 
     # Parameters
-    def SetFont(self, font):
+    def SetFONT(self, font):
         self.Params["FONT"] = font
         if font is not None:  # Font inherit by default
-            super().SetFont(self.R["FONT_" + font] if isinstance(font, str) else font)
+            self.SetFont(self.R["FONT_" + font] if isinstance(font, str) else font)
 
     def SetBG(self, bg):
         self.Params["BG"] = bg
-        self.SetBackgroundColour(self.R["COLOR_BG_" + bg] if isinstance(bg, str) else bg)
-        self.BackgroundBrush = self.R["BRUSH_BG_" + bg] if isinstance(bg, str) else bg
+        self.SetBackgroundColour(self.R["COLOR_BG_" + bg] if isinstance(bg, str) and not bg.startswith("#") else bg)
+        self.BackgroundBrush = self.R["BRUSH_BG_" + bg] if isinstance(bg, str) and not bg.startswith("#") else wx.Brush(bg)
 
     def SetFG(self, fg):
         self.Params["FG"] = fg
-        self.SetForegroundColour(self.R["COLOR_FG_" + fg] if isinstance(fg, str) else fg)
-        self.ForegroundBrush = self.R["BRUSH_FG_" + fg] if isinstance(fg, str) else fg
+        self.SetForegroundColour(self.R["COLOR_FG_" + fg] if isinstance(fg, str) and not fg.startswith("#") else fg)
+        self.ForegroundBrush = self.R["BRUSH_FG_" + fg] if isinstance(fg, str) and not fg.startswith("#") else wx.Brush(fg)
 
-    def SetRes(self, res):
+    def SetRES(self, res):
         self.Params["RES"] = res
         self.Resources = self.R["BRUSH_SET_" + res] if isinstance(res, str) else res
         self.Prepare()
 
-    def SetEdge(self, edge):
+    def SetEDGE(self, edge):
         self.Params["EDGE"] = edge
         if isinstance(edge, str) or edge is None:
             edge = MAPPING_EDGE[edge]
@@ -162,6 +165,33 @@ class BaseControl(wx.Control):
         if self._needReDraw:
             self.Refresh()
             self._needReDraw = False
+
+
+# ==================================================== DynaUI Mixin ====================================================
+class DynaUIMixin(object):
+    def __init__(self, parent, font, bg, fg):
+        self.Params = {"FONT": None, "BG": None, "FG": None}
+        self.R = parent.R
+        self.S = parent.S
+        self.L = parent.L
+        self.SetFONT(font)
+        self.SetBG(bg)
+        self.SetFG(fg)
+
+    def SetFONT(self, font):
+        self.Params["FONT"] = font
+        if font is not None:
+            self.SetFont(self.R["FONT_" + font] if isinstance(font, str) else font)
+
+    def SetBG(self, bg):
+        self.Params["BG"] = bg
+        self.SetBackgroundColour(self.R["COLOR_BG_" + bg] if isinstance(bg, str) and not bg.startswith("#") else bg)
+        self.BackgroundBrush = self.R["BRUSH_BG_" + bg] if isinstance(bg, str) and not bg.startswith("#") else wx.Brush(bg)
+
+    def SetFG(self, fg):
+        self.Params["FG"] = fg
+        self.SetForegroundColour(self.R["COLOR_FG_" + fg] if isinstance(fg, str) and not fg.startswith("#") else fg)
+        self.ForegroundBrush = self.R["BRUSH_FG_" + fg] if isinstance(fg, str) and not fg.startswith("#") else wx.Brush(fg)
 
 
 # ===================================================== Animation ======================================================

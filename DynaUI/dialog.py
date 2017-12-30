@@ -31,7 +31,7 @@ class BaseMain(BaseControl):
 
     def _AddSubSizer(self, sizer, orientation=wx.HORIZONTAL, w=0, h=0):
         if self.LABEL_WIDTH == -1:
-            w = h = -1
+            w = -1
         subSizer = wx.BoxSizer(orientation)
         if sizer.GetOrientation() == wx.VERTICAL:
             sizer.Add(subSizer, h == -1, (w == -1 and wx.EXPAND) | wx.ALL, self.MARGIN)
@@ -44,7 +44,7 @@ class BaseMain(BaseControl):
         sizer.Add(UI.Separator(self, orientation=(wx.VERTICAL | wx.HORIZONTAL) ^ sizer.GetOrientation()), 0, wx.EXPAND | wx.ALL, self.MARGIN)
 
     def AddSectionHead(self, sizer, tag="", **kwargs):
-        sizer.Add(UI.SectionHead(self, orientation=(wx.VERTICAL | wx.HORIZONTAL) ^ sizer.GetOrientation(), label=tag, **kwargs), 0, wx.EXPAND | wx.ALL, self.MARGIN)
+        sizer.Add(UI.SectionHead(self, orientation=(wx.VERTICAL | wx.HORIZONTAL) ^ sizer.GetOrientation(), tag=tag, **kwargs), 0, wx.EXPAND | wx.ALL, self.MARGIN)
 
     # --------------------------
     def AddButton(self, sizer, label="", tag="", width=None, onClick=None, **kwargs):
@@ -95,11 +95,11 @@ class BaseMain(BaseControl):
         return picker
 
     # --------------------------
-    def AddStaticText(self, sizer, label="", value="", width=-1):
+    def AddStaticText(self, sizer, label="", value="", width=-1, **kwargs):
         subSizer = self._AddSubSizer(sizer, orientation=wx.HORIZONTAL, w=width)
         if label:
             self._AddLabel(subSizer, label)
-        text = wx.StaticText(self, label=value, size=wx.Size(width, -1), style=wx.ST_ELLIPSIZE_END)
+        text = UI.StaticText(self, value=value, size=wx.Size(width, -1), style=wx.ST_ELLIPSIZE_END, **kwargs)
         subSizer.SetMinSize(-1, self.LINE_HEIGHT)
         subSizer.Add(text, 1, wx.ALIGN_CENTER)
         return text
@@ -123,16 +123,17 @@ class BaseMain(BaseControl):
             subSizer.Add(pic, height == -1, wx.EXPAND)
         return pic
 
-    def AddLineCtrl(self, sizer, label="", value="", width=-1, style=0, onInput=None, hint="", font=None, blend=False):
+    def AddLineCtrl(self, sizer, label="", value="", width=-1, style=0, onInput=None, hint="", font=None, readOnly=False):
         subSizer = self._AddSubSizer(sizer, orientation=wx.HORIZONTAL, w=width)
-        border = wx.BORDER_NONE if blend else wx.BORDER_SIMPLE
+        border = wx.BORDER_NONE if readOnly else wx.BORDER_SIMPLE
+        style |= wx.TE_READONLY if readOnly else 0
         if hint:
             text = UI.TextWithHint(self, hint=hint, value=value, size=wx.Size(width, self.LINE_HEIGHT), style=style | border)
         else:
             text = UI.Text(self, value=value, size=wx.Size(width, self.LINE_HEIGHT), style=style | border)
         if font is not None:
             text.SetFont(self.R["FONT_" + font] if isinstance(font, str) else font)
-        if blend:
+        if readOnly:
             text.SetBackgroundColour(self.R["COLOR_BG_L"])
         if label:
             name = self._AddLabel(subSizer, label)
@@ -290,14 +291,15 @@ class BaseHead(UI.Button):
 
 # ====================================================== BaseGrip ======================================================
 class BaseGrip(BaseControl):
-    def __init__(self, parent, **kwargs):
+    def __init__(self, parent, minSize=wx.Size(120, 10), **kwargs):
         super().__init__(parent, size=wx.Size(8, 8), **kwargs)
         self.Frame = parent
-        self.Bind(wx.EVT_MOUSE_EVENTS, self.OnMouse)
+        self.minSize = minSize
         self.leftDown = False
         self.lastMousePos = None
         self.lastFrameSize = None
         self.sizeRect = None
+        self.Bind(wx.EVT_MOUSE_EVENTS, self.OnMouse)
         self.NewAnimation("FADEIN", 16, self.SetRectAlpha, range(10, 81, 10), False)
         self.NewAnimation("FADEOUT", 16, self.SetRectAlpha, range(80, 9, -10), False, onStop=self.CloseRect)
 
@@ -344,7 +346,7 @@ class BaseGrip(BaseControl):
                 self.sizeRect.Show()
                 self.Play("FADEIN")
             x, y = self.ClientToScreen(evtPos) - self.lastMousePos + self.lastFrameSize
-            self.sizeRect.SetSize((max(x, 120), max(y, Va.SETTINGS["DLG_HEAD"] + 10)))
+            self.sizeRect.SetSize((max(x, self.minSize[0]), max(y, Va.SETTINGS["DLG_HEAD"] + self.minSize[1])))
         elif evtType == wx.wxEVT_ENTER_WINDOW:
             self.SetCursor(self.R["CURSOR_SIZING"])
         elif evtType == wx.wxEVT_LEAVE_WINDOW:
@@ -373,8 +375,8 @@ class BaseDialog(wx.Frame):
         self.S = invoker.S
         self.L = invoker.L
         self.SetFont(self.R["FONT_" + font] if isinstance(font, str) else font)
-        self.SetBackgroundColour(self.R["COLOR_BG_" + bg] if isinstance(bg, str) else bg)
-        self.SetForegroundColour(self.R["COLOR_FG_" + fg] if isinstance(fg, str) else fg)
+        self.SetBackgroundColour(self.R["COLOR_BG_" + bg] if isinstance(bg, str) and not bg.startswith("#") else bg)
+        self.SetForegroundColour(self.R["COLOR_FG_" + fg] if isinstance(fg, str) and not fg.startswith("#") else fg)
         self.SetBackgroundStyle(wx.BG_STYLE_PAINT)
         self.Bind(wx.EVT_SIZE, self.OnSize)
         self.Bind(wx.EVT_PAINT, self.OnPaint)
@@ -383,7 +385,7 @@ class BaseDialog(wx.Frame):
         self.Timers = {}
         self.Animations = {}
         self.NewAnimation("FADEIN", 16, self.SetTransparent, range(55, 256, 50), False, onStart=self.Show, onStop=(self.Bind, wx.EVT_ACTIVATE, self.OnActivation))
-        self.NewAnimation("FADEOUT", 16, self.SetTransparent, range(200, -1, -50), False, onStart=(self.Unbind, wx.EVT_ACTIVATE), onStop=self.Destroy)
+        self.NewAnimation("FADEOUT", 16, self.SetTransparent, range(200, -1, -50), False, onStart=(self.Unbind, wx.EVT_ACTIVATE), onStop=self.DoDestroy)
         self.SetTransparent(5)
 
         self.minimized = False
@@ -402,6 +404,11 @@ class BaseDialog(wx.Frame):
         Ut.DropShadow(self)
 
     # --------------------------------------
+    def DoDestroy(self):
+        if self.GetCapture():
+            self.GetCapture().ReleaseMouse()  # Why is this not a default behavior !?
+        self.Destroy()
+
     def OnDestroy(self, evt):
         self.MakeModal(False)
         for timer in self.Timers:
@@ -485,21 +492,22 @@ class BaseDialog(wx.Frame):
 
 # =================================================== BaseMiniDialog ===================================================
 class BaseMiniDialog(wx.Frame):
-    def __init__(self, parent, pos=wx.DefaultPosition, size=wx.DefaultSize, font="N", bg="L", fg="L", main=None, **kwargs):
-        super().__init__(parent=parent, pos=pos, size=size, style=wx.BORDER_NONE | wx.FRAME_NO_TASKBAR | wx.FRAME_FLOAT_ON_PARENT)
-        self.R = parent.R
-        self.S = parent.S
-        self.L = parent.L
+    def __init__(self, parent=None, pos=wx.DefaultPosition, size=wx.DefaultSize, invoker=None, font="N", bg="L", fg="L", main=None, **kwargs):
+        super().__init__(parent=parent, pos=pos, size=size, style=wx.BORDER_NONE | wx.FRAME_NO_TASKBAR | (wx.FRAME_FLOAT_ON_PARENT if parent else 0))
+        invoker = parent or invoker
+        self.R = invoker.R
+        self.S = invoker.S
+        self.L = invoker.L
         self.SetFont(self.R["FONT_" + font] if isinstance(font, str) else font)
-        self.SetBackgroundColour(self.R["COLOR_BG_" + bg] if isinstance(bg, str) else bg)
-        self.SetForegroundColour(self.R["COLOR_FG_" + fg] if isinstance(fg, str) else fg)
+        self.SetBackgroundColour(self.R["COLOR_BG_" + bg] if isinstance(bg, str) and not bg.startswith("#") else bg)
+        self.SetForegroundColour(self.R["COLOR_FG_" + fg] if isinstance(fg, str) and not fg.startswith("#") else fg)
         self.Bind(wx.EVT_SIZE, self.OnSize)
         self.Bind(wx.EVT_WINDOW_DESTROY, self.OnDestroy)
         self.Bind(wx.EVT_TIMER, lambda evt: Ab.Do(evt.GetTimer().func))
         self.Timers = {}
         self.Animations = {}
         self.NewAnimation("FADEIN", 16, self.SetTransparent, range(55, 256, 50), False, onStart=self.Show)
-        self.NewAnimation("FADEOUT", 16, self.SetTransparent, range(200, -1, -50), False, onStop=self.Destroy)
+        self.NewAnimation("FADEOUT", 16, self.SetTransparent, range(200, -1, -50), False, onStop=self.DoDestroy)
         self.SetTransparent(5)
 
         self.Main = main(self, **kwargs)
@@ -519,6 +527,11 @@ class BaseMiniDialog(wx.Frame):
         for a in self.Animations:
             self.Animations[a].Stop()
         self.Animations[name].Play(sequence, repeat)
+
+    def DoDestroy(self):
+        if self.GetCapture():
+            self.GetCapture().ReleaseMouse()  # Why is this not a default behavior !?
+        self.Destroy()
 
     def OnDestroy(self, evt):
         for timer in self.Timers:

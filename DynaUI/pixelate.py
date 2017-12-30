@@ -11,7 +11,7 @@ CHARSET = ' !"#$%&\'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`ab
 
 
 class BitmapFont(object):
-    def __init__(self, color, bitmap, rect, w=None, h=None, mode=0, charset=CHARSET):
+    def __init__(self, color=None, bitmap=None, rect=None, w=None, h=None, mode=0, charset=CHARSET):
         offsetX, offsetY, charW, charH = rect
         self.w = w or charW
         self.h = h or charH

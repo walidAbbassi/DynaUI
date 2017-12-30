@@ -2,60 +2,53 @@
 
 
 import wx
-from ..core import BaseControl
+from ..core import BaseControl, DynaUIMixin
 from .. import utility as Ut
 
 __all__ = [
     "Text",
     "TextWithHint",
+    "StaticText",
+    "StaticBitmap",
     "Separator",
     "SectionHead",
-    "StaticBitmap",
-
-    "Label",
     "SwitchingText",
 ]
 
 
 # =================================================== Miscellaneous ====================================================
-class Text(wx.TextCtrl):
-    def __init__(self, parent, style=wx.BORDER_SIMPLE, *args, **kwargs):
-        super().__init__(parent, *args, **kwargs, style=style)
-        self.R = parent.R
-        self.S = parent.S
-        self.L = parent.L
-        self.SetBackgroundColour(self.R["COLOR_BG_D"])
-        self.SetForegroundColour(self.R["COLOR_FG_L"])
+class Text(wx.TextCtrl, DynaUIMixin):
+    def __init__(self, parent, value="", font=None, bg="D", fg="L", style=wx.BORDER_SIMPLE, *args, **kwargs):
+        wx.TextCtrl.__init__(self, parent, value=value, style=style, *args, **kwargs)
+        DynaUIMixin.__init__(self, parent, font=font, bg=bg, fg=fg)
 
 
 # =================================================== Miscellaneous ====================================================
-class TextWithHint(wx.TextCtrl):  # Only GetValue/SetValue/AppendText are reimplemented!
-    def __init__(self, parent, hint="", style=wx.BORDER_SIMPLE, *args, **kwargs):
-        super().__init__(parent, *args, **kwargs, style=style)
+class TextWithHint(wx.TextCtrl, DynaUIMixin):  # Only GetValue/SetValue/AppendText are reimplemented!
+    def __init__(self, parent, value="", hint="", font=None, bg="D", fg="L", style=wx.BORDER_SIMPLE, *args, **kwargs):
+        wx.TextCtrl.__init__(self, parent, value=value, style=style, *args, **kwargs)
+        DynaUIMixin.__init__(self, parent, font=font, bg=bg, fg=fg)
+        self.fg = fg
         self.hint = hint
-        self.R = parent.R
-        self.S = parent.S
-        self.L = parent.L
-        self.SetBackgroundColour(self.R["COLOR_BG_D"])
         self.Bind(wx.EVT_TEXT, self.OnText)
         self.Bind(wx.EVT_KILL_FOCUS, self.OnLeave)
         self.Bind(wx.EVT_SET_FOCUS, self.OnEnter)
         if self.IsEmpty():
             self.showMessage = True
-            self.SetForegroundColour(self.R["COLOR_FG_D"])
+            self.SetFG("D")
             self.ChangeValue(self.hint)
         else:
             self.showMessage = False
-            self.SetForegroundColour(self.R["COLOR_FG_L"])
+            self.SetFG(self.fg)
 
     def AppendText(self, text):
         if self.showMessage:
-            self.SetForegroundColour(self.R["COLOR_FG_L"])
+            self.SetFG(self.fg)
         super().AppendText(text)
 
     def SetValue(self, value):
         if self.showMessage:
-            self.SetForegroundColour(self.R["COLOR_FG_L"])
+            self.SetFG(self.fg)
         super().SetValue(value)
 
     def GetValue(self):
@@ -73,14 +66,48 @@ class TextWithHint(wx.TextCtrl):  # Only GetValue/SetValue/AppendText are reimpl
         if self.IsEmpty():
             self.showMessage = True
             self.ChangeValue(self.hint)
-            self.SetForegroundColour(self.R["COLOR_FG_D"])
+            self.SetFG("D")
         evt.Skip()
 
     def OnEnter(self, evt):
         if self.showMessage:
             self.ChangeValue("")
-            self.SetForegroundColour(self.R["COLOR_FG_L"])
+            self.SetFG(self.fg)
         evt.Skip()
+
+
+# =================================================== Miscellaneous ====================================================
+class StaticText(wx.StaticText, DynaUIMixin):
+    def __init__(self, parent, value="", font=None, bg="L", fg="L", style=0, *args, **kwargs):
+        wx.StaticText.__init__(self, parent, label=value, style=style | wx.BORDER_NONE, *args, **kwargs)
+        DynaUIMixin.__init__(self, parent, font=font, bg=bg, fg=fg)
+
+    def SetValue(self, value):
+        self.SetLabel(value)
+
+    def GetValue(self):
+        self.GetLabel()
+
+
+# =================================================== Miscellaneous ====================================================
+class StaticBitmap(BaseControl):
+    def __init__(self, parent, pos=wx.DefaultPosition, size=wx.DefaultSize, bitmap=wx.NullBitmap, bg="L"):
+        super().__init__(parent, pos=pos, size=size, bg=bg)
+        self.NullBitmap = wx.Bitmap(0, 0)
+        self.SetBitmap(bitmap or self.NullBitmap)
+        if size is wx.DefaultSize:
+            self.SetInitialSize(self.Bitmap.GetSize())
+
+    def SetBitmap(self, bitmap):
+        self.Bitmap = bitmap
+
+    def SetNullBitmap(self):
+        self.Bitmap = self.NullBitmap
+
+    def OnPaint(self, evt):
+        dc = wx.PaintDC(self)
+        dc.Clear()
+        dc.DrawBitmap(self.Bitmap, 0, 0, 1)
 
 
 # =================================================== Miscellaneous ====================================================
@@ -111,16 +138,16 @@ class Separator(BaseControl):
 
 
 # =================================================== Miscellaneous ====================================================
-class SectionHead(BaseControl):
-    def __init__(self, parent, pos=wx.DefaultPosition, size=wx.DefaultSize, orientation=wx.HORIZONTAL, label=("", "C"), shape="B", zOrder=0, font=None, bg="L", bg2="D", fg="B"):
+class SectionHead(BaseControl):  # TODO rework
+    def __init__(self, parent, pos=wx.DefaultPosition, size=wx.DefaultSize, orientation=wx.HORIZONTAL, tag=("", "C"), shape="B", zOrder=0, font=None, bg="L", bg2="D", fg="B"):
         super().__init__(parent, pos=pos, size=size, font=font, bg=bg, fg=fg)
         self.Bg2 = self.R["BRUSH_BG_" + bg2] if isinstance(bg2, str) else bg2
         self.Orientation = orientation
-        if isinstance(label, (tuple, list)):
-            self.SetLabel(label[0])
-            self.SetTagPos(label[1])
+        if isinstance(tag, (tuple, list)):
+            self.SetLabel(tag[0])
+            self.SetTagPos(tag[1])
         else:
-            self.SetLabel(label)
+            self.SetLabel(tag)
             self.SetTagPos("C")
         self.Render(shape, zOrder)
         if size is wx.DefaultSize:
@@ -212,52 +239,7 @@ class SectionHead(BaseControl):
 
 
 # =================================================== Miscellaneous ====================================================
-class StaticBitmap(BaseControl):
-    def __init__(self, parent, pos=wx.DefaultPosition, size=wx.DefaultSize, bitmap=wx.NullBitmap, bg="L"):
-        super().__init__(parent, pos=pos, size=size, bg=bg)
-        self.NullBitmap = wx.Bitmap(0, 0)
-        self.SetBitmap(bitmap or self.NullBitmap)
-        if size is wx.DefaultSize:
-            self.SetInitialSize(self.Bitmap.GetSize())
-
-    def SetBitmap(self, bitmap):
-        self.Bitmap = bitmap
-
-    def SetNullBitmap(self):
-        self.Bitmap = self.NullBitmap
-
-    def OnPaint(self, evt):
-        dc = wx.PaintDC(self)
-        dc.Clear()
-        dc.DrawBitmap(self.Bitmap, 0, 0, 1)
-
-
-# =================================================== Miscellaneous ====================================================
-class Label(BaseControl):
-    def __init__(self, parent, pos=wx.DefaultPosition, size=wx.DefaultSize, label="", target=None):
-        super().__init__(parent, pos=pos, size=size)
-        self.SetLabel(label)
-        self.Resources = self.R["BRUSH_SET_L"]
-        self.Brush = self.Resources["00"]
-        if target:
-            self.Bind(wx.EVT_MOUSE_EVENTS, lambda evt: wx.PostEvent(target, evt))
-            self.Bind(wx.EVT_ENTER_WINDOW, lambda evt: (self.Play("ENTER"), evt.Skip()))
-            self.Bind(wx.EVT_LEAVE_WINDOW, lambda evt: (self.Play("LEAVE"), evt.Skip()))
-            self.NewAnimation("ENTER", 25, "Brush", ("80", "FF"), True)
-            self.NewAnimation("LEAVE", 25, "Brush", ("C0", "80", "40", "00"), True)
-
-    def OnPaint(self, evt):
-        dc = wx.PaintDC(self)
-        w, h = self.GetSize()
-        dc.SetPen(wx.TRANSPARENT_PEN)
-        dc.SetBrush(self.Brush)
-        dc.DrawRectangle(0, 0, w, h)
-        tw, th, lh = dc.GetFullMultiLineTextExtent(self.Label)
-        dc.DrawText(self.GetLabel(), (w - tw) >> 1, (h - th) >> 1)
-
-
-# =================================================== Miscellaneous ====================================================
-class SwitchingText(BaseControl):
+class SwitchingText(BaseControl):  # TODO doesn't work on non MSW
     def __init__(self, parent, pos=wx.DefaultPosition, size=wx.DefaultSize, values=(),
                  font=None, res=None, bg="L", fg="L", edge=None):
         super().__init__(parent, pos=pos, size=size, font=font, res=res, bg=bg, fg=fg, edge=edge)

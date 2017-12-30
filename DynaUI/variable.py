@@ -139,10 +139,11 @@ class Resource(BaseDict):
             self["BITMAPFONT_%s" % font] = self.GetBitmapFont(font, "#ffffff")
 
     def SetMainFont(self, point, fontface):
-        self["FONT_N"] = wx.Font(point, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL, False, fontface)
-        self["FONT_I"] = wx.Font(point, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_BOLD, False, fontface)
-        self["FONT_H"] = wx.Font(point, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_ITALIC, wx.FONTWEIGHT_NORMAL, False, fontface)
-        self["FONT_J"] = wx.Font(point, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_ITALIC, wx.FONTWEIGHT_BOLD, False, fontface)
+        self["FONT_N"] = wx.Font(point, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL, False, fontface) # Normal
+        self["FONT_I"] = wx.Font(point, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_BOLD, False, fontface) # Impact
+        self["FONT_H"] = wx.Font(point, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_ITALIC, wx.FONTWEIGHT_NORMAL, False, fontface) # Handwritten
+        self["FONT_J"] = wx.Font(point, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_ITALIC, wx.FONTWEIGHT_BOLD, False, fontface) # H I J
+        self["FONT_U"] = wx.Font(point, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL, True, fontface) # Underline
 
     def GetColorSet(self, bg, fg):
         return {"00": AlphaBlend(bg, fg, 0),
