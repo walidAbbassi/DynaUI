@@ -95,11 +95,12 @@ class ExampleUI(wx.Frame):
         self.AddSeparator(Sizer)
 
         SubSizer = wx.BoxSizer(wx.VERTICAL)
-        SubSizer.Add(SwitchingText(self.Main, size=wx.Size(80, 20), values=("Switching", "Text", "Example"), bg="D"), SF_001A4)
-        SubSizer.Add(StaticBitmap(self.Main, bitmap=self.R["UI_IMAGE3"]))
+        SubSizer.Add(SwitchingText(self.Main, size=wx.Size(80, 20), values=("Switching", "Text", "Example"), bg="D"), SF_000A4)
+        SubSizer.Add(StaticBitmap(self.Main, bitmap=self.R["UI_IMAGE3"], size=wx.Size(48, 48), bg="B"), SF_000A4)
+        SubSizer.Add(Line(self.Main), SF_010A4)
         SubSizer.Add(TextWithHint(self.Main, hint="TextWithHint", style=wx.BORDER_SIMPLE | wx.TE_MULTILINE), SF_110A4)
         Sizer.Add(SubSizer, SF_010A4)
-        self.AddSeparator(Sizer)
+        Sizer.Add(Line(self.Main, orientation=wx.VERTICAL), SF_010A4)
 
         Sizer.Add(SectionHead(self.Main, orientation=wx.VERTICAL, tag=("Z", "T"), shape="R"), SF_010A2)
         Sizer.Add(SectionHead(self.Main, orientation=wx.VERTICAL, tag="Z", shape="C"), SF_010A2)

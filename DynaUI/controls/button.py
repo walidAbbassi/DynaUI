@@ -64,12 +64,13 @@ class Button(BaseControl):
             self.leftDown = True
         elif evtType == wx.wxEVT_LEFT_UP:
             if self.HasCapture(): self.ReleaseMouse()
+            if self.leftDown:
+                self.OnClick()
+                self.leftDown = False
             if wx.Rect(0, 0, *self.GetSize()).Contains(evtPos):
                 self.SetState(BTN_STATE_HOVER)
-                self.OnClick()
             else:
                 self.SetState(BTN_STATE_IDLE)
-            self.leftDown = False
         elif evtType == wx.wxEVT_ENTER_WINDOW:
             if not self.leftDown:
                 self.SetState(BTN_STATE_HOVER)
@@ -628,7 +629,6 @@ class PickerValue(ToolNormal):
         super().__init__(parent=parent, pos=pos, size=size, style=style, showTag=True, tag=tag or ("", "L", 2), pics=pics or (parent.R["AP_TRIANGLE_D"], "R"), func=self.OnButton,
                          font=font, res=res, bg=bg, fg=fg, edge=edge)
         self.Bind(wx.EVT_MOUSEWHEEL, self.OnWheel)
-        self.edge = edge
         self.Associate = associate
         self.AutoLabel = self.Tag == ""
         self.selected = selected
@@ -649,8 +649,10 @@ class PickerValue(ToolNormal):
             self.SetSelection(min(self.selected + 1, len(self.choices) - 1))
 
     def OnButton(self):
+        if not self.choices:
+            return
         size = wx.Size(self.GetSize()[0], min(400, (max(self.GetFont().GetPixelSize()[1], Ut.GetFontHeight(self)) + 4) * len(self.choices) + 2))
-        d = Di.BaseMiniDialog(invoker=self, pos=self.GetScreenPosition() + (0, self.GetSize()[1] - 1), size=size, main=ListCtrl, data=[(i,) for i in self.choices], width=(-1,), edge=self.edge)
+        d = Di.BaseMiniDialog(invoker=self, pos=self.GetScreenPosition() + (0, self.GetSize()[1] - 1), size=size, main=ListCtrl, data=[(i,) for i in self.choices], width=(-1,), edge=self.Params["EDGE"] or "D")
         d.Main.SetSelection(self.selected)
         d.Main.Bind(wx.EVT_KILL_FOCUS, lambda evt: (d.Play("FADEOUT"), self.SetFocus()))
         d.Main.OnSelection = lambda: (self.SetSelection(d.Main.GetSelection()), d.Play("FADEOUT"), self.SetFocus())

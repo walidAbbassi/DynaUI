@@ -2,15 +2,18 @@
 
 
 import wx
+from wx import stc
 from ..core import BaseControl, DynaUIMixin
 from .. import utility as Ut
 
 __all__ = [
     "Text",
     "TextWithHint",
+    "StyledTextCtrl",
     "StaticText",
     "StaticBitmap",
     "Separator",
+    "Line",
     "SectionHead",
     "SwitchingText",
 ]
@@ -77,6 +80,34 @@ class TextWithHint(wx.TextCtrl, DynaUIMixin):  # Only GetValue/SetValue/AppendTe
 
 
 # =================================================== Miscellaneous ====================================================
+class StyledTextCtrl(stc.StyledTextCtrl, DynaUIMixin):
+    def __init__(self, parent, value="", font=None, bg="D", fg="L", edge=False, hideScrollBar=False, style=0, *args, **kwargs):
+        stc.StyledTextCtrl.__init__(self, parent, style=style | (wx.BORDER_SIMPLE if edge else wx.BORDER_NONE), *args, **kwargs)
+        DynaUIMixin.__init__(self, parent, font=font, bg=bg, fg=fg)
+        if hideScrollBar:
+            self.SetUseVerticalScrollBar(False)
+            self.SetUseHorizontalScrollBar(False)
+        self.SetCaretWidth(2)
+        self.SetCaretForeground(self.ForegroundColour)
+        self.SetMarginLeft(4)
+        self.SetMarginRight(4)
+        self.SetMarginWidth(1, 0)
+        self.SetEOLMode(stc.STC_EOL_LF)
+        self.SetLexer(stc.STC_LEX_NULL)
+        self.SetIndent(4)
+        self.SetUseTabs(False)
+        self.SetTabWidth(4)
+        self.SetScrollWidth(self.GetSize()[0])
+        self.SetScrollWidthTracking(True)
+        self.SetSelBackground(True, self.R["COLOR_BG_B"])
+        self.StyleSetBackground(stc.STC_STYLE_DEFAULT, self.BackgroundColour)
+        self.StyleSetForeground(stc.STC_STYLE_DEFAULT, self.ForegroundColour)
+        self.StyleSetFont(stc.STC_STYLE_DEFAULT, self.Font)
+        self.StyleClearAll()
+        self.SetValue(value)
+
+
+# =================================================== Miscellaneous ====================================================
 class StaticText(wx.StaticText, DynaUIMixin):
     def __init__(self, parent, value="", font=None, bg="L", fg="L", style=0, *args, **kwargs):
         wx.StaticText.__init__(self, parent, label=value, style=style | wx.BORDER_NONE, *args, **kwargs)
@@ -93,21 +124,61 @@ class StaticText(wx.StaticText, DynaUIMixin):
 class StaticBitmap(BaseControl):
     def __init__(self, parent, pos=wx.DefaultPosition, size=wx.DefaultSize, bitmap=wx.NullBitmap, bg="L"):
         super().__init__(parent, pos=pos, size=size, bg=bg)
+        self.Bind(wx.EVT_SIZE, self.OnSize)
+        self.Bind(wx.EVT_MOUSE_EVENTS, self.OnMouse)
         self.NullBitmap = wx.Bitmap(0, 0)
-        self.SetBitmap(bitmap or self.NullBitmap)
+        self.Bitmap = bitmap or self.NullBitmap
         if size is wx.DefaultSize:
             self.SetInitialSize(self.Bitmap.GetSize())
+        self.leftDown = False
+        self.leftPos = None
+        self.offset = (0, 0)
+        self.lastOffset = (0, 0)
 
     def SetBitmap(self, bitmap):
         self.Bitmap = bitmap
+        self.ReDraw()
 
     def SetNullBitmap(self):
         self.Bitmap = self.NullBitmap
+        self.ReDraw()
 
     def OnPaint(self, evt):
-        dc = wx.PaintDC(self)
+        dc = wx.BufferedPaintDC(self)
         dc.Clear()
-        dc.DrawBitmap(self.Bitmap, 0, 0, 1)
+        dc.DrawBitmap(self.Bitmap, *self.offset, 1)
+
+    def OnSize(self, evt):
+        evt.Skip()
+        self.SetOffset(self.offset)
+
+    def OnMouse(self, evt):
+        evtType = evt.GetEventType()
+        evtPos = evt.GetPosition()
+        if evtType == wx.wxEVT_LEFT_DOWN or evtType == wx.wxEVT_LEFT_DCLICK:
+            if not self.HasCapture(): self.CaptureMouse()
+            self.leftDown = True
+            self.leftPos = evtPos
+        elif evtType == wx.wxEVT_LEFT_UP:
+            if self.HasCapture(): self.ReleaseMouse()
+            self.leftDown = False
+            self.leftPos = None
+            self.lastOffset = self.offset
+        elif evtType == wx.wxEVT_MOTION and self.leftDown:
+            self.SetOffset(evtPos - self.leftPos + self.lastOffset)
+            self.ReDraw()
+        evt.Skip()
+
+    def OnCaptureLost(self, evt):
+        self.leftDown = False
+        self.leftPos = None
+        self.lastOffset = self.offset
+
+    def SetOffset(self, offset):
+        x, y = offset
+        w, h = self.GetSize()
+        bw, bh = self.Bitmap.GetSize()
+        self.offset = (min(max(x, w - bw), 0), min(max(y, h - bh), 0))
 
 
 # =================================================== Miscellaneous ====================================================
@@ -135,6 +206,29 @@ class Separator(BaseControl):
         dc.DrawLine(0, h2 - 1, w, h2 - 1)
         dc.SetPen(self.R["PEN_EDGE_L"])
         dc.DrawLine(0, h2, w, h2)
+
+
+# =================================================== Miscellaneous ====================================================
+class Line(BaseControl):
+    def __init__(self, parent, pos=wx.DefaultPosition, size=wx.Size(1, 1), orientation=wx.HORIZONTAL, bg="L", fg="L"):
+        super().__init__(parent, pos=pos, size=size, bg=bg, fg=fg)
+        self.Bind(wx.EVT_PAINT, self.OnPaintV if orientation == wx.VERTICAL else self.OnPaintH)
+
+    def OnPaintV(self, evt):
+        w, h = self.GetSize()
+        h2 = h >> 1
+        dc = wx.PaintDC(self)
+        dc.Clear()
+        dc.GradientFillLinear(wx.Rect(0, 0, w, h2), self.BackgroundColour, self.ForegroundColour, wx.BOTTOM)
+        dc.GradientFillLinear(wx.Rect(0, h2, w, h2), self.BackgroundColour, self.ForegroundColour, wx.UP)
+
+    def OnPaintH(self, evt):
+        w, h = self.GetSize()
+        w2 = w >> 1
+        dc = wx.PaintDC(self)
+        dc.Clear()
+        dc.GradientFillLinear(wx.Rect(0, 0, w2, h), self.BackgroundColour, self.ForegroundColour, wx.RIGHT)
+        dc.GradientFillLinear(wx.Rect(w2, 0, w2, h), self.BackgroundColour, self.ForegroundColour, wx.LEFT)
 
 
 # =================================================== Miscellaneous ====================================================

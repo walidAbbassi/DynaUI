@@ -337,11 +337,13 @@ class ListCtrl(Scrolled):
         self.data = [(i,) for i in choices]
         self.Selection = -1
         self.SetActualSize()
+        self.ReDraw()
 
     def SetData(self, data):
         self.data = data
         self.Selection = -1
         self.SetActualSize()
+        self.ReDraw()
 
     def SetWidth(self, width):
         self.width = width
