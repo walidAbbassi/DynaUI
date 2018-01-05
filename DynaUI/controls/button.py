@@ -34,7 +34,7 @@ BTN_CHANGE_CLICK_HOVER = BTN_STATE_HOVER | BTN_STATE_CLICK | BTN_CHANGE_REVERSE
 class Button(BaseControl):
     def __init__(self, parent, pos=wx.DefaultPosition, size=wx.DefaultSize, style=0,
                  tag=None, pic=None, func=None,
-                 font=None, res="D", bg="D", fg="L", edge="D", async=False, fpsLimit=0):
+                 font=None, res="D", bg="D", fg="L", edge="L", async=False, fpsLimit=0):
         super().__init__(parent=parent, pos=pos, size=size, style=style, font=font, res=res, bg=bg, fg=fg, edge=edge, async=async, fpsLimit=fpsLimit)
         self.Bind(wx.EVT_SIZE, self.OnSize)
         self.Bind(wx.EVT_MOUSE_EVENTS, self.OnMouse)
@@ -350,7 +350,7 @@ ButtonNormal = Button
 class ButtonToggle(ButtonMixinToggle, Button):
     def __init__(self, parent, pos=wx.DefaultPosition, size=wx.DefaultSize, style=0,
                  toggle=False, tag=None, pic=None, tag2=None, pic2=None, func=None,
-                 font=None, res="D", bg="D", fg="L", edge="D", async=False, fpsLimit=0):
+                 font=None, res="D", bg="D", fg="L", edge="L", async=False, fpsLimit=0):
         Button.__init__(self, parent=parent, pos=pos, size=size, style=style, tag=tag, pic=pic, func=func, font=font, res=res, bg=bg, fg=fg, edge=edge, async=async, fpsLimit=fpsLimit)
         ButtonMixinToggle.__init__(self, toggle, tag2, pic2)
 
@@ -358,7 +358,7 @@ class ButtonToggle(ButtonMixinToggle, Button):
 class ButtonBundle(ButtonMixinBundle, Button):
     def __init__(self, parent, pos=wx.DefaultPosition, size=wx.DefaultSize, style=0,
                  toggle=False, group="", tag=None, pic=None, func=None,
-                 font=None, res="D", bg="D", fg="L", edge="D", async=False, fpsLimit=0):
+                 font=None, res="D", bg="D", fg="L", edge="L", async=False, fpsLimit=0):
         Button.__init__(self, parent=parent, pos=pos, size=size, style=style, tag=tag, pic=pic, func=func, font=font, res=res, bg=bg, fg=fg, edge=edge, async=async, fpsLimit=fpsLimit)
         ButtonMixinBundle.__init__(self, toggle, group)
 
@@ -475,7 +475,7 @@ class PickerFont(Button):
     def __init__(self, parent, pos=wx.DefaultPosition, size=wx.DefaultSize, style=0,
                  associate=None, value=None,
                  tag="", pic=None,
-                 font=None, res="D", bg="D", fg="L", edge="D"):
+                 font=None, res="D", bg="D", fg="L", edge="L"):
         super().__init__(parent=parent, pos=pos, size=size, style=style, tag=tag, pic=pic, func=self.OnButton, font=font, res=res, bg=bg, fg=fg, edge=edge)
         self.Associate = associate
         self.AutoLabel = self.Tag == ""
@@ -508,7 +508,7 @@ class PickerDirection(Button):
     def __init__(self, parent, pos=wx.DefaultPosition, size=wx.DefaultSize, style=0,
                  associate=None, value="CC",
                  tag="[+]", pic=None,
-                 font=None, res="D", bg="D", fg="L", edge="D"):
+                 font=None, res="D", bg="D", fg="L", edge="L"):
         super().__init__(parent=parent, pos=pos, size=size, style=style, tag=tag, pic=pic, func=None, font=font, res=res, bg=bg, fg=fg, edge=edge)
         self.Associate = associate
         self.SetValue(value)
@@ -556,7 +556,7 @@ class PickerNumber(Button):  # TODO Wheel
     def __init__(self, parent, pos=wx.DefaultPosition, size=wx.DefaultSize, style=0,
                  associate=None, value=0, vRange=(0, 5), baseRange=None,
                  tag="", pic=None,
-                 font=None, res="D", bg="D", fg="L", edge="D"):
+                 font=None, res="D", bg="D", fg="L", edge="L"):
         super().__init__(parent=parent, pos=pos, size=size, style=style, tag=tag, pic=pic, func=None, font=font, res=res, bg=bg, fg=fg, edge=edge)
         self.Bind(wx.EVT_MOUSEWHEEL, self.OnWheel)
         self.Associate = associate
@@ -625,7 +625,7 @@ class PickerValue(ToolNormal):
     def __init__(self, parent, pos=wx.DefaultPosition, size=wx.DefaultSize, style=0,
                  associate=None, selected=-1, choices=(),
                  tag="", pics=None,
-                 font=None, res="D", bg="D", fg="L", edge="D"):
+                 font=None, res="D", bg="D", fg="L", edge="L"):
         super().__init__(parent=parent, pos=pos, size=size, style=style, showTag=True, tag=tag or ("", "L", 2), pics=pics or (parent.R["AP_TRIANGLE_D"], "R"), func=self.OnButton,
                          font=font, res=res, bg=bg, fg=fg, edge=edge)
         self.Bind(wx.EVT_MOUSEWHEEL, self.OnWheel)
@@ -661,9 +661,9 @@ class PickerValue(ToolNormal):
     def GetSelection(self):
         return self.selected
 
-    def SetSelection(self, selected):
+    def SetSelection(self, selected, send=True):
         self.selected = selected
-        if self.Associate:
+        if send and self.Associate:
             self.Associate(self.selected)
         if self.AutoLabel:
             self.SetTag(self.choices[self.selected])

@@ -81,7 +81,7 @@ class ScrollBar(object):
 
 class Scrolled(BaseControl):
     def __init__(self, parent, pos=wx.DefaultPosition, size=wx.DefaultSize, style=0,
-                 font=None, res=None, bg="L", fg="L", edge="D", async=False, fpsLimit=120):
+                 font=None, res=None, bg="L", fg="L", edge="L", async=False, fpsLimit=120):
         super().__init__(parent, pos=pos, size=size, style=style | wx.BORDER_NONE | wx.WANTS_CHARS, font=font, res=res, bg=bg, fg=fg, edge=edge, async=async, fpsLimit=fpsLimit)
         self.Unbind(wx.EVT_PAINT)
         self.Bind(wx.EVT_PAINT, self.DoPaint)
@@ -311,12 +311,11 @@ class ImageViewer(Scrolled):
 # ======================================================================================================================
 # ListCtrl, ListBox (ListBox is just ListCtrl with one column)
 # width: positive for fixed width, negative for weight for auto adjust
-# Subclass and implement OnSelection and OnActivation
 # TODO H Scroll
 class ListCtrl(Scrolled):
-    def __init__(self, parent, data, width, order=None, drawColumn=True,
-                 pos=wx.DefaultPosition, size=wx.DefaultSize, font=None, bg="D", fg="L", edge="D"):
-        super().__init__(parent, pos=pos, size=size, font=font, bg=bg, fg=fg, edge=edge)
+    def __init__(self, parent, data=None, width=None, order=None, drawColumn=True, onClick=None, onDClick=None,
+                 pos=wx.DefaultPosition, size=wx.DefaultSize, style=0, font=None, res=None, bg="D", fg="L", edge="L"):
+        super().__init__(parent, pos=pos, size=size, style=style, font=font, res=res, bg=bg, fg=fg, edge=edge)
         self.LastVSize = [0, 0]
         self.CoordsX = []
         self.CoordsY = []
@@ -326,6 +325,11 @@ class ListCtrl(Scrolled):
         self.Bind(wx.EVT_CHAR, self.OnChar)
         self.NewTimer("Typing", self.OnTyping)
 
+        if width is None:
+            width = (-1,)
+        if data is None:
+            data = []
+
         self.SetWidth(width)
         self.SetOrder(order)
         self.SetLineHeight(auto=False)
@@ -333,17 +337,30 @@ class ListCtrl(Scrolled):
 
         self.drawColumn = drawColumn
 
-    def SetChoices(self, choices):
+        self.OnSelection = onClick
+        self.OnActivation = onDClick
+
+    def SetChoices(self, choices, send=True):
+        self.choices = choices
         self.data = [(i,) for i in choices]
         self.Selection = -1
-        self.SetActualSize()
-        self.ReDraw()
+        if send:
+            self.SetActualSize()
+            self.ReDraw()
 
-    def SetData(self, data):
+    def SetData(self, data, send=True):
+        self.choices = None
         self.data = data
         self.Selection = -1
-        self.SetActualSize()
-        self.ReDraw()
+        if send:
+            self.SetActualSize()
+            self.ReDraw()
+
+    def GetChoices(self):
+        return self.choices
+
+    def GetData(self):
+        return self.data
 
     def SetWidth(self, width):
         self.width = width
@@ -436,9 +453,9 @@ class ListCtrl(Scrolled):
                 Ab.Do(self.OnActivation)
 
     # Selection related ====================================
-    def SetSelection(self, s):  # -1 = no selection
+    def SetSelection(self, s, send=True):  # -1 = no selection
         self.Selection = min(max(s, -1), len(self.data) - 1)
-        if self.Selection != -1: Ab.Do(self.OnSelection)
+        if self.Selection != -1 and send: Ab.Do(self.OnSelection)
 
     def GetSelection(self):
         return self.Selection
@@ -490,10 +507,3 @@ class ListCtrl(Scrolled):
 
     def OnTyping(self):
         self.Input = ""
-
-    # Implemented by subclass ========================
-    def OnSelection(self):
-        pass
-
-    def OnActivation(self):
-        pass

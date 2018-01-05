@@ -21,14 +21,16 @@ __all__ = [
 
 # =================================================== Miscellaneous ====================================================
 class Text(wx.TextCtrl, DynaUIMixin):
-    def __init__(self, parent, value="", font=None, bg="D", fg="L", style=wx.BORDER_SIMPLE, *args, **kwargs):
+    def __init__(self, parent, value="", font=None, bg="D", fg="L", edge=True, style=0, *args, **kwargs):
+        style |= (wx.BORDER_SIMPLE if edge else wx.BORDER_NONE)
         wx.TextCtrl.__init__(self, parent, value=value, style=style, *args, **kwargs)
         DynaUIMixin.__init__(self, parent, font=font, bg=bg, fg=fg)
 
 
 # =================================================== Miscellaneous ====================================================
-class TextWithHint(wx.TextCtrl, DynaUIMixin):  # Only GetValue/SetValue/AppendText are reimplemented!
-    def __init__(self, parent, value="", hint="", font=None, bg="D", fg="L", style=wx.BORDER_SIMPLE, *args, **kwargs):
+class TextWithHint(wx.TextCtrl, DynaUIMixin):  # Only GetValue/SetValue/AppendText/Clear are reimplemented!
+    def __init__(self, parent, value="", hint="", font=None, bg="D", fg="L", edge=True, style=0, *args, **kwargs):
+        style |= (wx.BORDER_SIMPLE if edge else wx.BORDER_NONE)
         wx.TextCtrl.__init__(self, parent, value=value, style=style, *args, **kwargs)
         DynaUIMixin.__init__(self, parent, font=font, bg=bg, fg=fg)
         self.fg = fg
@@ -43,6 +45,14 @@ class TextWithHint(wx.TextCtrl, DynaUIMixin):  # Only GetValue/SetValue/AppendTe
         else:
             self.showMessage = False
             self.SetFG(self.fg)
+
+    def Clear(self):
+        if not self.showMessage:
+            super().Clear()
+            if self.IsEmpty():
+                self.showMessage = True
+                self.ChangeValue(self.hint)
+                self.SetFG("D")
 
     def AppendText(self, text):
         if self.showMessage:

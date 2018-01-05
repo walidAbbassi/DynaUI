@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
     name="DynaUI",
-    version="1.1.0",
+    version="1.1.1",
     description="A framework to increase the scalability and flexibility of wxPython",
     url="https://github.com/yadizhou/DynaUI",
     author="Yadi Zhou",

@@ -23,22 +23,33 @@ class BaseMain(BaseControl):
         self.Frame = parent
         self.SetDoubleBuffered(True)
 
-    def _AddLabel(self, sizer, label):
-        name = wx.StaticText(self, label=label, size=wx.Size(self.LABEL_WIDTH, -1), style=wx.ST_ELLIPSIZE_END)
-        sizer.Add(name, self.LABEL_WIDTH == -1, wx.ALIGN_CENTER)
-        sizer.Add(self.MARGIN * 2, self.MARGIN)
-        return name
-
-    def _AddSubSizer(self, sizer, orientation=wx.HORIZONTAL, w=0, h=0):
-        if self.LABEL_WIDTH == -1:
-            w = -1
-        subSizer = wx.BoxSizer(orientation)
-        if sizer.GetOrientation() == wx.VERTICAL:
-            sizer.Add(subSizer, h == -1, (w == -1 and wx.EXPAND) | wx.ALL, self.MARGIN)
+    # --------------------------------------
+    def _AddCtrl(self, sizer, label, ctrl, stretchX, stretchY, inline):
+        if label:
+            name = wx.StaticText(self, label=label, size=wx.Size(self.LABEL_WIDTH, -1), style=wx.ST_ELLIPSIZE_END)
+            ctrl.label = name
+            if inline:
+                if sizer.GetOrientation() == wx.HORIZONTAL:
+                    subSizer = sizer
+                else:
+                    subSizer = self.AddPerpendicularSizer(sizer, stretchY, (stretchX or self.LABEL_WIDTH == -1) and wx.EXPAND)
+                subSizer.Add(name, self.LABEL_WIDTH == -1, wx.ALIGN_CENTER | wx.ALL, self.MARGIN)
+                subSizer.Add(ctrl, stretchX, (stretchY and wx.EXPAND) | wx.ALL, self.MARGIN)
+            else:
+                if sizer.GetOrientation() == wx.HORIZONTAL:
+                    subSizer = self.AddPerpendicularSizer(sizer, stretchX or self.LABEL_WIDTH == -1, stretchY and wx.EXPAND)
+                else:
+                    subSizer = sizer
+                subSizer.Add(name, 0, (self.LABEL_WIDTH == -1 and wx.EXPAND) | wx.ALL, self.MARGIN)
+                subSizer.Add(ctrl, stretchY, (stretchX and wx.EXPAND) | wx.ALL, self.MARGIN)
         else:
-            sizer.Add(subSizer, w == -1, (h == -1 and wx.EXPAND) | wx.ALL, self.MARGIN)
-        return subSizer
+            ctrl.label = None
+            if sizer.GetOrientation() == wx.HORIZONTAL:
+                sizer.Add(ctrl, stretchX, (stretchY and wx.EXPAND) | wx.ALL, self.MARGIN)
+            else:
+                sizer.Add(ctrl, stretchY, (stretchX and wx.EXPAND) | wx.ALL, self.MARGIN)
 
+    # --------------------------------------
     def AddPerpendicularSizer(self, sizer, *args, **kwargs):
         subSizer = wx.BoxSizer((wx.VERTICAL | wx.HORIZONTAL) ^ sizer.GetOrientation())
         sizer.Add(subSizer, *args, **kwargs)
@@ -60,202 +71,113 @@ class BaseMain(BaseControl):
         sizer.Add(head, 0, wx.EXPAND | wx.ALL, self.MARGIN)
         return head
 
-    # --------------------------
-    def AddButton(self, sizer, label="", tag="", width=None, onClick=None, edge="L", **kwargs):
+    # -------------------------------------- # Stretch only on X and not by default
+    def AddButton(self, sizer, label="", width=None, height=None, tag="", onClick=None, **kwargs):
         width = width or self.BUTTON_WIDTH
-        subSizer = self._AddSubSizer(sizer, orientation=wx.HORIZONTAL, w=width)
-        if label:
-            self._AddLabel(subSizer, label)
-        button = UI.ButtonNormal(self, size=wx.Size(width, self.LINE_HEIGHT), tag=tag, func=onClick, edge=edge, **kwargs)
-        subSizer.Add(button, width == -1)
-        return button
+        height = height or self.LINE_HEIGHT
+        btn = (UI.ToolNormal if "pics" in kwargs else UI.ButtonNormal)(self, size=wx.Size(width, height), tag=tag, func=onClick, **kwargs)
+        self._AddCtrl(sizer, label, btn, width == -1, False, True)
+        return btn
 
-    def AddButtonToggle(self, sizer, label="", tags=(), width=None, toggle=False, onClick=None, edge="L", **kwargs):
+    def AddButtonToggle(self, sizer, label="", width=None, height=None, tags=(), toggle=False, onClick=None, **kwargs):
         width = width or self.BUTTON_WIDTH
-        subSizer = self._AddSubSizer(sizer, orientation=wx.HORIZONTAL, w=width)
-        if label:
-            self._AddLabel(subSizer, label)
-        button = UI.ButtonToggle(self, size=wx.Size(width, self.LINE_HEIGHT), tag=tags[0], tag2=tags[1], func=onClick, edge=edge, toggle=toggle, **kwargs)
-        subSizer.Add(button, width == -1)
-        return button
+        height = height or self.LINE_HEIGHT
+        btn = (UI.ToolToggle if "pics" in kwargs else UI.ButtonToggle)(self, size=wx.Size(width, height), tag=tags[0], tag2=tags[1], func=onClick, toggle=toggle, **kwargs)
+        self._AddCtrl(sizer, label, btn, width == -1, False, True)
+        return btn
 
-    def AddButtonBundle(self, sizer, label="", choices=(), width=None, rows=1, selected=-1, group=None, onClick=None, edge="L", **kwargs):
+    def AddButtonBundle(self, sizer, label="", width=None, height=None, rows=1, choices=(), selected=-1, group=None, onClick=None, **kwargs):
         width = width or self.BUTTON_WIDTH
-        bPerRow = (len(choices) + rows - 1) // rows
+        height = height or self.LINE_HEIGHT
+        ctrl = (UI.ToolBundle if "pics" in kwargs else UI.ButtonBundle)
         group = group or Ut.GetRandomName(exclude=self.Groups.keys())
-        subSizers = [wx.BoxSizer(wx.HORIZONTAL) for i in range(rows)]
-        if label:
-            self._AddLabel(subSizers[0], label)
-            for s in subSizers[1:]:
-                s.Add(self.LABEL_WIDTH, -1, 0, wx.ALIGN_CENTER)
-                s.Add(self.MARGIN * 2, self.MARGIN)
-        buttons = []
+        autoEdge = "edge" not in kwargs
+        cols = (len(choices) + rows - 1) // rows
+        rows = (len(choices) + cols - 1) // cols
+        btns = []
+        gridSizer = wx.GridSizer(rows, cols, 0, 0)
         for index, tag in enumerate(choices):
-            button = UI.ButtonBundle(self, size=wx.Size(width, self.LINE_HEIGHT), tag=tag, func=onClick, edge=edge, toggle=index == selected, group=group, **kwargs)
-            subSizers[index // bPerRow].Add(button, width == -1)
-            buttons.append(button)
-        subSizer = self._AddSubSizer(sizer, orientation=wx.VERTICAL, w=width)
-        for s in subSizers:
-            subSizer.Add(s, 1, wx.EXPAND)
-        return UI.Bundled(buttons)
+            if autoEdge:
+                kwargs["edge"] = ("RB" + ("L" if not index % cols else "") + ("T" if index < cols else ""), "")
+            btn = ctrl(self, size=wx.Size(width, height), tag=tag, func=onClick, toggle=index == selected, group=group, **kwargs)
+            gridSizer.Add(btn, width == -1)
+            btns.append(btn)
+        self._AddCtrl(sizer, label, gridSizer, width == -1, False, True)
+        bundled = UI.Bundled(btns)
+        bundled.label = gridSizer.label
+        return bundled
 
-    def AddPickerValue(self, sizer, label="", choices=(), selected=-1, width=None, edge="L", **kwargs):
+    def AddPickerValue(self, sizer, label="", width=None, height=None, choices=(), selected=-1, **kwargs):
         width = width or self.BUTTON_WIDTH
-        subSizer = self._AddSubSizer(sizer, orientation=wx.HORIZONTAL, w=width)
-        if label:
-            self._AddLabel(subSizer, label)
-        picker = UI.PickerValue(self, size=wx.Size(width, self.LINE_HEIGHT), choices=choices, selected=selected, edge=edge, **kwargs)
-        subSizer.Add(picker, width == -1)
-        return picker
+        height = height or self.LINE_HEIGHT
+        btn = UI.PickerValue(self, size=wx.Size(width, height), choices=choices, selected=selected, **kwargs)
+        self._AddCtrl(sizer, label, btn, width == -1, False, True)
+        return btn
 
-    # --------------------------
-    def AddStaticText(self, sizer, label="", value="", width=-1, rows=None, style=0, **kwargs):
-        subSizer = self._AddSubSizer(sizer, orientation=wx.HORIZONTAL, w=width)
-        if label:
-            self._AddLabel(subSizer, label)
-        text = UI.StaticText(self, value=value, size=wx.Size(width, -1 if rows is None else self.LINE_HEIGHT * rows), style=style, **kwargs)
-        subSizer.Add(text, width == -1)
+    # -------------------------------------- # Stretch only on X and does it by default
+    def AddStaticText(self, sizer, label="", width=-1, height=-1, value="", **kwargs):
+        height = height or self.LINE_HEIGHT
+        text = UI.StaticText(self, value=value, size=wx.Size(width, height), **kwargs)
+        self._AddCtrl(sizer, label, text, width == -1, False, True)
         return text
 
+    def AddLineCtrl(self, sizer, label="", width=-1, height=None, value="", onInput=None, **kwargs):
+        height = height or self.LINE_HEIGHT
+        text = (UI.TextWithHint if "hint" in kwargs else UI.Text)(self, value=value, size=wx.Size(width, height), **kwargs)
+        if onInput:
+            text.Bind(wx.EVT_TEXT, onInput)
+        self._AddCtrl(sizer, label, text, width == -1, False, True)
+        s = text.GetContainingSizer()
+        if s.GetOrientation() == wx.HORIZONTAL:
+            s.Detach(text)
+            s.Add(text, width == -1, wx.ALIGN_CENTER | wx.ALL, self.MARGIN)
+        return text
+
+    # -------------------------------------- # Stretch on both X and Y and does it by default
     def AddStaticBitmap(self, sizer, label="", width=-1, height=-1, inline=True, bitmap=wx.NullBitmap, **kwargs):
         pic = UI.StaticBitmap(self, size=wx.Size(width, height), bitmap=bitmap, **kwargs)
-        if label:
-            name = wx.StaticText(self, label=label, size=wx.Size(self.LABEL_WIDTH, -1 if inline else self.LINE_HEIGHT), style=wx.ST_ELLIPSIZE_END)
-        else:
-            name = None
-        if inline:
-            subSizer = self._AddSubSizer(sizer, orientation=wx.HORIZONTAL, w=width, h=height)
-            if name:
-                subSizer.Add(name, self.LABEL_WIDTH == -1, wx.ALIGN_CENTER)
-                subSizer.Add(self.MARGIN * 2, self.MARGIN)
-            subSizer.Add(pic, width == -1, wx.EXPAND)
-        else:
-            subSizer = self._AddSubSizer(sizer, orientation=wx.VERTICAL, w=width, h=height)
-            if name:
-                subSizer.Add(name, self.LABEL_WIDTH == -1, wx.EXPAND)
-            subSizer.Add(pic, height == -1, wx.EXPAND)
+        self._AddCtrl(sizer, label, pic, width == -1, height == -1, inline)
         return pic
 
-    def AddLineCtrl(self, sizer, label="", value="", width=-1, style=0, onInput=None, hint="", font=None):
-        subSizer = self._AddSubSizer(sizer, orientation=wx.HORIZONTAL, w=width)
-        if style & wx.TE_READONLY:
-            style |= wx.BORDER_NONE
-            bg = self.Params["BG"]
-        else:
-            style |= wx.BORDER_SIMPLE
-            bg = "D"
-        if hint:
-            text = UI.TextWithHint(self, hint=hint, value=value, size=wx.Size(width, self.LINE_HEIGHT), style=style, bg=bg)
-        else:
-            text = UI.Text(self, value=value, size=wx.Size(width, self.LINE_HEIGHT), style=style, bg=bg)
-        if font is not None:
-            text.SetFont(self.R["FONT_" + font] if isinstance(font, str) else font)
+    def AddTextCtrl(self, sizer, label="", width=-1, height=-1, inline=True, value="", onInput=None, **kwargs):
+        kwargs["style"] = wx.TE_MULTILINE | kwargs.get("style", 0)
+        text = (UI.TextWithHint if "hint" in kwargs else UI.Text)(self, value=value, size=wx.Size(width, height), **kwargs)
         if onInput:
             text.Bind(wx.EVT_TEXT, onInput)
-        if label:
-            name = self._AddLabel(subSizer, label)
-            name.Bind(wx.EVT_LEFT_DOWN, lambda evt: (text.SetFocus(), text.SelectAll()))
-
-        subSizer.Add(text, width == -1)
+        self._AddCtrl(sizer, label, text, width == -1, height == -1, inline)
         return text
 
-    def AddTextCtrl(self, sizer, label="", value="", width=-1, height=-1, style=0, inline=True, onInput=None, hint="", font=None):
-        if style & wx.TE_READONLY:
-            style |= wx.BORDER_NONE
-            bg = self.Params["BG"]
-        else:
-            style |= wx.BORDER_SIMPLE
-            bg = "D"
-        if hint:
-            text = UI.TextWithHint(self, hint=hint, value=value, size=wx.Size(width, height), style=style | wx.TE_MULTILINE, bg=bg)
-        else:
-            text = UI.Text(self, value=value, size=wx.Size(width, height), style=style | wx.TE_MULTILINE, bg=bg)
-        if font is not None:
-            text.SetFont(self.R["FONT_" + font] if isinstance(font, str) else font)
-        if onInput:
-            text.Bind(wx.EVT_TEXT, onInput)
-        if label:
-            name = wx.StaticText(self, label=label, size=wx.Size(self.LABEL_WIDTH, -1 if inline else self.LINE_HEIGHT), style=wx.ST_ELLIPSIZE_END)
-            name.Bind(wx.EVT_LEFT_DOWN, lambda evt: (text.SetFocus(), text.SelectAll()))
-        else:
-            name = None
-        if inline:
-            subSizer = self._AddSubSizer(sizer, orientation=wx.HORIZONTAL, w=width, h=height)
-            if name:
-                subSizer.Add(name, self.LABEL_WIDTH == -1, wx.ALIGN_CENTER)
-                subSizer.Add(self.MARGIN * 2, self.MARGIN)
-            subSizer.Add(text, width == -1, wx.EXPAND)
-        else:
-            subSizer = self._AddSubSizer(sizer, orientation=wx.VERTICAL, w=width, h=height)
-            if name:
-                subSizer.Add(name, self.LABEL_WIDTH == -1, wx.EXPAND)
-            subSizer.Add(text, height == -1, wx.EXPAND)
-        return text
-
-    def AddStyledTextCtrl(self, sizer, label="", value="", width=-1, height=-1, inline=True, **kwargs):
+    def AddStyledTextCtrl(self, sizer, label="", width=-1, height=-1, inline=True, value="", **kwargs):
         text = UI.StyledTextCtrl(self, size=wx.Size(width, height), value=value, **kwargs)
-        if label:
-            name = wx.StaticText(self, label=label, size=wx.Size(self.LABEL_WIDTH, -1 if inline else self.LINE_HEIGHT), style=wx.ST_ELLIPSIZE_END)
-        else:
-            name = None
-        if inline:
-            subSizer = self._AddSubSizer(sizer, orientation=wx.HORIZONTAL, w=width, h=height)
-            if name:
-                subSizer.Add(name, self.LABEL_WIDTH == -1, wx.ALIGN_CENTER)
-                subSizer.Add(self.MARGIN * 2, self.MARGIN)
-            subSizer.Add(text, width == -1, wx.EXPAND)
-        else:
-            subSizer = self._AddSubSizer(sizer, orientation=wx.VERTICAL, w=width, h=height)
-            if name:
-                subSizer.Add(name, self.LABEL_WIDTH == -1, wx.EXPAND)
-            subSizer.Add(text, height == -1, wx.EXPAND)
+        self._AddCtrl(sizer, label, text, width == -1, height == -1, inline)
         return text
 
-    # --------------------------
-    def AddListBox(self, sizer, label="", choices=(), selected=-1, width=-1, height=-1, onClick=None, onDClick=None, inline=True, font=None, edge="L"):
-        if label:
-            name = wx.StaticText(self, label=label, size=wx.Size(self.LABEL_WIDTH, -1 if inline else self.LINE_HEIGHT), style=wx.ST_ELLIPSIZE_END)
-        else:
-            name = None
-        listbox = UI.ListCtrl(self, data=[(i,) for i in choices], size=wx.Size(width, height), width=(-1,), edge=edge, font=font)
-        listbox.SetSelection(selected)
-        listbox.OnSelection = onClick or Ab.DoNothing
-        listbox.OnActivation = onDClick or Ab.DoNothing
-        if inline:
-            subSizer = self._AddSubSizer(sizer, orientation=wx.HORIZONTAL, w=width, h=height)
-            if name:
-                subSizer.Add(name, self.LABEL_WIDTH == -1, wx.ALIGN_CENTER)
-                subSizer.Add(self.MARGIN * 2, self.MARGIN)
-            subSizer.Add(listbox, width == -1, wx.EXPAND)
-        else:
-            subSizer = self._AddSubSizer(sizer, orientation=wx.VERTICAL, w=width, h=height)
-            if name:
-                subSizer.Add(name, self.LABEL_WIDTH == -1, wx.EXPAND)
-            subSizer.Add(listbox, height == -1, wx.EXPAND)
-        return listbox
+    def AddListBox(self, sizer, label="", width=-1, height=-1, inline=True, choices=(), selected=-1, **kwargs):
+        lbox = UI.ListCtrl(self, size=wx.Size(width, height), **kwargs)
+        lbox.SetChoices(choices)
+        lbox.SetSelection(selected, False)
+        self._AddCtrl(sizer, label, lbox, width == -1, height == -1, inline)
+        return lbox
 
-    # --------------------------
-    def AddPickerFile(self, sizer, label="", value="", width=-1, width2=None, mode="L", wildcard="All files (*.*)|*.*", hint="", style=0, onSelect=None, edge="L"):
-        width2 = width2 or self.BUTTON_WIDTH
-        onSelect = onSelect or Ab.DoNothing
-        if hint:
-            text = UI.TextWithHint(self, hint=hint, value=value, size=wx.Size(width, self.LINE_HEIGHT), style=style | wx.BORDER_SIMPLE)
-        else:
-            text = UI.Text(self, value=value, size=wx.Size(width, self.LINE_HEIGHT), style=style | wx.BORDER_SIMPLE)
+    # --------------------------------------
+    def AddPickerFile(self, sizer, label="", width=-1, width2=None, height=None, value="", mode="L", wildcard="All files (*.*)|*.*", onSelect=None, **kwargs):
+        width2 = width2 or self.LINE_HEIGHT
+        height = height or self.LINE_HEIGHT
+        text = (UI.TextWithHint if "hint" in kwargs else UI.Text)(self, value=value, size=wx.Size(width, height), **kwargs)
+        btn = UI.Button(self, size=wx.Size(width2, height), tag="...", edge=("TRB", ""))
         if mode == "L":
-            func = lambda: text.SetValue(Ut.ShowOpenFileDialog(self, self.L.Get("GENERAL_HEAD_LOAD"), wildcard) or "")
+            func = lambda: text.SetValue(Ut.ShowOpenFileDialog(self, self.L.Get("GENERAL_HEAD_LOAD"), wildcard) or text.GetValue())
         else:
-            func = lambda: text.SetValue(Ut.ShowSaveFileDialog(self, self.L.Get("GENERAL_HEAD_SAVE"), wildcard) or "")
-        button = UI.Button(self, size=wx.Size(width2, self.LINE_HEIGHT), tag="...", edge=edge, func=((self.GetGrandParent().Disable,), func, onSelect, self.GetGrandParent().Enable))
-        subSizer = self._AddSubSizer(sizer, orientation=wx.HORIZONTAL, w=width)
-        if label:
-            name = self._AddLabel(subSizer, label)
-            name.Bind(wx.EVT_LEFT_DOWN, lambda evt: (text.SetFocus(), text.SelectAll()))
+            func = lambda: text.SetValue(Ut.ShowSaveFileDialog(self, self.L.Get("GENERAL_HEAD_SAVE"), wildcard) or text.GetValue())
+        btn.Func = ((self.GetGrandParent().Disable,), func, onSelect, self.GetGrandParent().Enable, lambda: wx.PostEvent(btn, wx.MouseEvent(wx.wxEVT_LEAVE_WINDOW)))
+        subSizer = wx.BoxSizer(wx.HORIZONTAL)
         subSizer.Add(text, width == -1)
-        subSizer.Add(button, width2 == -1)
+        subSizer.Add(btn, width2 == -1)
+        self._AddCtrl(sizer, label, subSizer, width == -1, False, True)
+        text.label = subSizer.label
         return text
 
-    # --------------------------
+    # --------------------------------------
     def AddStdButton(self, sizer, size=None, onOK=None, onCancel=None, onApply=None):
         size = size or wx.Size(60, self.LINE_HEIGHT)
         if onOK is not None:
@@ -264,18 +186,20 @@ class BaseMain(BaseControl):
             self[0] = UI.ToolNormal(self, size=size, pics=self.R["AP_CROSS"], edge="D", func=onCancel)
         if onApply is not None:
             self[2] = UI.ToolNormal(self, size=size, pics=self.R["AP_APPLY"], edge="D", func=onApply)
-        subSizer = sizer if sizer.GetOrientation() == wx.HORIZONTAL else wx.BoxSizer(wx.HORIZONTAL)
+        if sizer.GetOrientation() == wx.HORIZONTAL:
+            subSizer = sizer
+            sizer.Add(4, 4, 1)
+        else:
+            subSizer = self.AddPerpendicularSizer(sizer, 0, wx.ALIGN_RIGHT)
         for i in (1, 0, 2):
             if i in self:
                 subSizer.Add(self[i], 0, wx.ALL, self.MARGIN)
-        if subSizer is not sizer:
-            sizer.Add(subSizer, 0, wx.ALIGN_RIGHT | wx.ALL, 0)
 
 
 # ====================================================== BaseHead ======================================================
 class BaseHead(UI.Button):
     def __init__(self, parent, buttons=True, **kwargs):
-        super().__init__(parent, size=wx.Size(-1, Va.SETTINGS["DLG_HEAD"]), tag=(parent.GetTitle(), "L", 7, 0), fg=parent.R["COLOR_DLG_HEAD_FG"]["00"], **kwargs)
+        super().__init__(parent, size=wx.Size(-1, Va.SETTINGS["DLG_HEAD"]), tag=(parent.GetTitle(), "L", 7, 0), fg=parent.R["COLOR_DLG_HEAD_FG"]["00"], edge="D", **kwargs)
         self.Frame = parent
         self.NewAnimation("ENTER", 10, self.SetResource, ("FF", "C0", "80", "40", "00"), False, onStop=(self.SetButtonResources, "BRUSH_DLG_SET_I"))
         self.NewAnimation("LEAVE", 10, self.SetResource, ("00", "40", "80", "C0", "FF"), False, onStart=(self.SetButtonResources, "BRUSH_DLG_SET_O"))

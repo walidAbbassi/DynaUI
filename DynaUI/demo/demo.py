@@ -32,7 +32,7 @@ class ExampleUI(wx.Frame):
         self.Info = Info(self, edge=("T", ""))
         self.Info.AddItems((wx.StaticText(self.Info, label="status"), 0))
         items = (
-            ("N", "TOOL_SETTING", self.ShowDialog), "|",
+            ("N", "TOOL_SETTING", None), "|",
             ("N", "TOOL_SETTING", (self.Tool.SetItemSize, wx.Size(64, 64))),
             ("N", "TOOL_SETTING", (self.Tool.SetItemSize, wx.Size(32, 32))), "|",
             ("T", "TOOL_SETTING", None, {"toggle": 1, "res": "R"}), "|",
@@ -98,9 +98,17 @@ class ExampleUI(wx.Frame):
         SubSizer.Add(SwitchingText(self.Main, size=wx.Size(80, 20), values=("Switching", "Text", "Example"), bg="D"), SF_000A4)
         SubSizer.Add(StaticBitmap(self.Main, bitmap=self.R["UI_IMAGE3"], size=wx.Size(48, 48), bg="B"), SF_000A4)
         SubSizer.Add(Line(self.Main), SF_010A4)
-        SubSizer.Add(TextWithHint(self.Main, hint="TextWithHint", style=wx.BORDER_SIMPLE | wx.TE_MULTILINE), SF_110A4)
+        SubSizer.Add(TextWithHint(self.Main, hint="TextWithHint", style=wx.TE_MULTILINE), SF_110A4)
         Sizer.Add(SubSizer, SF_010A4)
         Sizer.Add(Line(self.Main, orientation=wx.VERTICAL), SF_010A4)
+
+        SubSizer = wx.BoxSizer(wx.VERTICAL)
+        SubSizer.Add(Button(self.Main, size=SIZE_LONG, tag="Dialog1", func=(self.ShowDialog, Dialog1)))
+        SubSizer.Add(Button(self.Main, size=SIZE_LONG, tag="Dialog2", func=(self.ShowDialog, Dialog2)))
+        SubSizer.Add(Button(self.Main, size=SIZE_LONG, tag="Dialog3", func=(self.ShowDialog, Dialog3)))
+        SubSizer.Add(Button(self.Main, size=SIZE_LONG, tag="Dialog4", func=(self.ShowDialog, Dialog4)))
+        Sizer.Add(SubSizer, SF_000A4)
+        self.AddSeparator(Sizer)
 
         Sizer.Add(SectionHead(self.Main, orientation=wx.VERTICAL, tag=("Z", "T"), shape="R"), SF_010A2)
         Sizer.Add(SectionHead(self.Main, orientation=wx.VERTICAL, tag="Z", shape="C"), SF_010A2)
@@ -158,8 +166,8 @@ class ExampleUI(wx.Frame):
         self.Layout()
         self.Center(wx.BOTH)
 
-    def ShowDialog(self):
-        d = BaseDialog(self, "Dialog", main=Dialog)
+    def ShowDialog(self, dlg):
+        d = BaseDialog(self, "Dialog", main=dlg)
         d.SetSize(d.GetEffectiveMinSize())
         d.Center()
         d.Play("FADEIN")
@@ -168,10 +176,9 @@ class ExampleUI(wx.Frame):
         Sizer.Add(Separator(self.Main, orientation=wx.VERTICAL), SF_010A4)
 
 
-class Dialog(BaseMain):
+class Dialog1(BaseMain):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-
         Sizer = wx.BoxSizer(wx.VERTICAL)
         self.SetSizer(Sizer)
         self.AddSectionHead(Sizer, tag="SectionHead", shape="C")
@@ -186,51 +193,90 @@ class Dialog(BaseMain):
         self.AddSeparator(Sizer)
         self.AddPickerFile(Sizer, label="PickerFile")
 
-        # Sizer = wx.BoxSizer(wx.HORIZONTAL)
-        # self.SetSizer(Sizer)
-        # Left = wx.BoxSizer(wx.VERTICAL)
-        # Middle = wx.BoxSizer(wx.VERTICAL)
-        # Right = wx.BoxSizer(wx.VERTICAL)
-        # self.AddButton(Left, label="", tag="Button", width=40)
-        # self.AddButton(Left, label="", tag="Button", width=-1)
-        # self.AddButton(Left, label="123", tag="Button", width=40)
-        # self.AddButton(Left, label="123", tag="Button", width=-1)
-        # self.AddSeparator(Left)
-        # self.AddButtonToggle(Left, label="", tags=("Button", "Nottub"), width=40)
-        # self.AddButtonToggle(Left, label="", tags=("Button", "Nottub"), width=-1)
-        # self.AddButtonToggle(Left, label="123", tags=("Button", "Nottub"), width=40)
-        # self.AddButtonToggle(Left, label="123", tags=("Button", "Nottub"), width=-1)
-        # self.AddSeparator(Left)
-        # self.AddButtonBundle(Left, label="", tags=("A", "B", "C"), width=20, toggled=0, group="1")
-        # self.AddButtonBundle(Left, label="", tags=("A", "B", "C"), width=-1, toggled=1, group="2")
-        # self.AddButtonBundle(Left, label="123", tags=("A", "B", "C", "D", "E"), width=20, rows=2, toggled=2, group="3")
-        # self.AddButtonBundle(Left, label="123", tags=("A", "B", "C", "D", "E", "F"), width=-1, rows=3, toggled=0, group="4")
-        # self.AddPickerValue(Left, label="", choices=("A", "B", "C"), width=40)
-        # self.AddPickerValue(Left, label="", choices=("A", "B", "C"), width=-1)
-        # self.AddPickerValue(Left, label="123", choices=("A", "B", "C", "D", "E"), width=40)
-        # self.AddPickerValue(Left, label="123", choices=("A", "B", "C", "D", "E", "F"), width=-1)
-        # self.AddStaticText(Middle, "STA", "ssss", width=-1)
-        # self.AddLineCtrl(Middle, "TEXT", width=100)
-        # self.AddLineCtrl(Middle, "TEXT", width=-1)
-        # self.AddSeparator(Middle)
-        # self.AddTextCtrl(Middle, "TEXT", inline=1, height=-1, width=-1)
-        # self.AddTextCtrl(Middle, "TEXT", inline=1, height=40, width=-1)
-        # self.AddTextCtrl(Middle, "TEXT", inline=1, height=-1, width=40)
-        # self.AddTextCtrl(Middle, "TEXT", inline=1, height=40, width=40)
-        # self.AddTextCtrl(Right, "TEXT", inline=0, height=-1, width=-1)
-        # self.AddTextCtrl(Right, "TEXT", inline=0, height=40, width=-1)
-        # self.AddTextCtrl(Right, "TEXT", inline=0, height=-1, width=40)
-        # self.AddTextCtrl(Right, "TEXT", inline=0, height=40, width=40)
-        # self.AddTextCtrl(Right, "", inline=0, height=-1, width=-1)
-        # self.AddTextCtrl(Right, "", inline=0, height=40, width=-1)
-        # self.AddTextCtrl(Right, "", inline=0, height=-1, width=40)
-        # self.AddTextCtrl(Right, "", inline=0, height=40, width=40)
-        # self.AddStdButton(Right)
-        # Sizer.Add(Left, 0, wx.EXPAND)
-        # self.AddSeparator(Sizer)
-        # Sizer.Add(Middle, 1, wx.EXPAND)
-        # self.AddSeparator(Sizer)
-        # Sizer.Add(Right, 1, wx.EXPAND)
+
+class Dialog2(BaseMain):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        Sizer = wx.BoxSizer(wx.HORIZONTAL)
+        self.SetSizer(Sizer)
+        Left = wx.BoxSizer(wx.VERTICAL)
+        Middle = wx.BoxSizer(wx.VERTICAL)
+        Right = wx.BoxSizer(wx.VERTICAL)
+        self.AddButton(Left, label="", tag="Button", width=40)
+        self.AddButton(Left, label="", tag="Button", width=-1)
+        self.AddButton(Left, label="123", tag="Button", width=40)
+        self.AddButton(Left, label="123", tag="Button", width=-1)
+        self.AddSeparator(Left)
+        self.AddButtonToggle(Left, label="", tags=("Button", "Nottub"), width=40)
+        self.AddButtonToggle(Left, label="", tags=("Button", "Nottub"), width=-1)
+        self.AddButtonToggle(Left, label="123", tags=("Button", "Nottub"), width=40)
+        self.AddButtonToggle(Left, label="123", tags=("Button", "Nottub"), width=-1)
+        self.AddSeparator(Left)
+        self.AddPickerValue(Left, label="", choices=("A", "B", "C"), width=40)
+        self.AddPickerValue(Left, label="", choices=("A", "B", "C"), width=-1)
+        self.AddPickerValue(Left, label="123", choices=("A", "B", "C", "D", "E"), width=40)
+        self.AddPickerValue(Left, label="123", choices=("A", "B", "C", "D", "E", "F"), width=-1)
+        self.AddStaticText(Middle, label="STA", value="ssss", width=-1)
+        self.AddLineCtrl(Middle, "TEXT", width=100)
+        self.AddLineCtrl(Middle, "TEXT", width=-1)
+        self.AddSeparator(Middle)
+        self.AddTextCtrl(Middle, "TEXT", inline=1, height=-1, width=-1)
+        self.AddTextCtrl(Middle, "TEXT", inline=1, height=40, width=-1)
+        self.AddTextCtrl(Middle, "TEXT", inline=1, height=-1, width=40)
+        self.AddTextCtrl(Middle, "TEXT", inline=1, height=40, width=40)
+        self.AddTextCtrl(Right, "TEXT", inline=0, height=-1, width=-1)
+        self.AddTextCtrl(Right, "TEXT", inline=0, height=40, width=-1)
+        self.AddTextCtrl(Right, "TEXT", inline=0, height=-1, width=40)
+        self.AddTextCtrl(Right, "TEXT", inline=0, height=40, width=40)
+        self.AddTextCtrl(Right, "", inline=0, height=-1, width=-1)
+        self.AddTextCtrl(Right, "", inline=0, height=40, width=-1)
+        self.AddTextCtrl(Right, "", inline=0, height=-1, width=40)
+        self.AddTextCtrl(Right, "", inline=0, height=40, width=40)
+        self.AddStdButton(Right)
+        Sizer.Add(Left, 0, wx.EXPAND)
+        self.AddSeparator(Sizer)
+        Sizer.Add(Middle, 1, wx.EXPAND)
+        self.AddSeparator(Sizer)
+        Sizer.Add(Right, 1, wx.EXPAND)
+
+
+class Dialog3(BaseMain):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        Sizer = wx.BoxSizer(wx.VERTICAL)
+        self.SetSizer(Sizer)
+        self.AddListBox(Sizer, "List", width=-1, height=-1, inline=1, choices=list("123456"))
+        self.AddListBox(Sizer, "List", width=-1, height=-1, inline=0, choices=list("123456"))
+        self.AddListBox(Sizer, "List", width=-1, height=60, inline=1, choices=list("123456"))
+        self.AddListBox(Sizer, "List", width=-1, height=60, inline=0, choices=list("123456"))
+        self.AddListBox(Sizer, "List", width=60, height=-1, inline=1, choices=list("123456"))
+        self.AddListBox(Sizer, "List", width=60, height=-1, inline=0, choices=list("123456"))
+        self.AddListBox(Sizer, "List", width=60, height=60, inline=1, choices=list("123456"))
+        self.AddListBox(Sizer, "List", width=60, height=60, inline=0, choices=list("123456"))
+
+
+class Dialog4(BaseMain):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        Sizer = wx.BoxSizer(wx.HORIZONTAL)
+        Left = self.AddPerpendicularSizer(Sizer, 1, wx.EXPAND)
+        self.AddLine(Sizer)
+        Right = self.AddPerpendicularSizer(Sizer, 1, wx.EXPAND)
+        self.SetSizer(Sizer)
+        self.AddButtonBundle(Left, label="", width=24, choices=list("123456"), rows=1)
+        self.AddButtonBundle(Left, label="", width=24, choices=list("123456"), rows=2)
+        self.AddButtonBundle(Left, label="Bundled", width=24, choices=list("123456"), rows=3)
+        self.AddButtonBundle(Left, label="Bundled", width=24, choices=list("123456"), rows=4)
+        self.AddButtonBundle(Left, label="Bundled", width=24, choices=list("123456"), rows=5)
+        self.AddButtonBundle(Left, label="Bundled", width=24, choices=list("123456"), rows=6)
+        self.AddButtonBundle(Left, label="Bundled", width=24, choices=list("123456"), rows=7)
+        self.AddButtonBundle(Right, label="", width=24, choices=list("1234567"), rows=1)
+        self.AddButtonBundle(Right, label="", width=24, choices=list("1234567"), rows=2)
+        self.AddButtonBundle(Right, label="Bundled", width=24, choices=list("1234567"), rows=3)
+        self.AddButtonBundle(Right, label="Bundled", width=24, choices=list("1234567"), rows=4)
+        self.AddButtonBundle(Right, label="Bundled", width=24, choices=list("1234567"), rows=5)
+        self.AddButtonBundle(Right, label="Bundled", width=24, choices=list("1234567"), rows=6)
+        self.AddButtonBundle(Right, label="Bundled", width=24, choices=list("1234567"), rows=7)
 
 
 if __name__ == "__main__":
