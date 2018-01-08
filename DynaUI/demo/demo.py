@@ -90,7 +90,7 @@ class ExampleUI(wx.Frame):
         for _ in range(3):
             GridSizer.Add(4, 4)
         for pos in ("LT", "T", "RT", "L", "C", "R", "LB", "B", "RB"):
-            GridSizer.Add(ButtonBundle(self.Main, size=SIZE_SQUARE, pic=(self.R["UI_IMAGE2"], pos), group="whatever", res="L", edge="BE"))
+            GridSizer.Add(ButtonBundle(self.Main, size=SIZE_SQUARE, pic=(self.R["UI_IMAGE2"], pos), group="whatever", res="D", edge="BE"))
         Sizer.Add(GridSizer, SF_000A4)
         self.AddSeparator(Sizer)
 
@@ -149,7 +149,7 @@ class ExampleUI(wx.Frame):
         Sizer = wx.WrapSizer()
         for key in self.R:
             if key.startswith("AP_"):
-                t = ToolNormal(self.Main, size=SIZE_SQUARE, pics=self.R[key], edge="D")
+                t = ToolNormal(self.Main, size=SIZE_SQUARE, pics=self.R[key], res="_L", edge=None)
                 t.SetTip(self.Info.SetStatus, key)
                 Sizer.Add(t, SF_000A4)
         MainSizer.Add(Sizer, 0, wx.EXPAND)

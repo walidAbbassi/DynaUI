@@ -44,7 +44,31 @@ class Setting(BaseDict):
 
 
 class Resource(BaseDict):
-    DEFAULT = {}
+    DEFAULT = {
+        "COLOR_R"            : "#ff0000",
+        "COLOR_X"            : "#ff8000",
+        "COLOR_Y"            : "#0080ff",
+        "COLOR_Z"            : "#ff0080",
+
+        "COLOR_EDGE_D"       : "#141414",
+        "COLOR_EDGE_L"       : "#5a5a5a",
+        "COLOR_EDGE_B"       : "#808080",
+        "COLOR_BG_D"         : "#343434",
+        "COLOR_BG_L"         : "#404040",
+        "COLOR_BG_B"         : "#606060",
+        "COLOR_FG_D"         : "#808080",
+        "COLOR_FG_L"         : "#c0c0c0",
+        "COLOR_FG_B"         : "#ffffff",
+
+        "COLOR_ACTIVE"       : "#2675b2",
+        "COLOR_INACTIVE"     : "#80808080",
+
+        "COLOR_SIZING"       : "#00c0ff",
+        "COLOR_DLG_HEAD_FG_I": "#ffffff",
+        "COLOR_DLG_HEAD_FG_O": "#202020",
+        "COLOR_DLG_HEAD_BG_I": "#303030",
+        "COLOR_DLG_HEAD_BG_O": "#808080",
+    }
 
     def __init__(self, fp=None):
         super().__init__()
@@ -52,33 +76,6 @@ class Resource(BaseDict):
         if fp is not None:
             self.Load(fp)
         self["__DynaUI__"] = Img.DynaUI.GetBitmap()
-        # ---- Color ----
-        for key, default in {
-            "COLOR_R"            : "#ff0000",
-            "COLOR_X"            : "#ff8000",
-            "COLOR_Y"            : "#0080ff",
-            "COLOR_Z"            : "#ff0080",
-
-            "COLOR_EDGE_D"       : "#141414",
-            "COLOR_EDGE_L"       : "#5a5a5a",
-            "COLOR_EDGE_B"       : "#808080",
-            "COLOR_BG_D"         : "#343434",
-            "COLOR_BG_L"         : "#404040",
-            "COLOR_BG_B"         : "#606060",
-            "COLOR_FG_D"         : "#808080",
-            "COLOR_FG_L"         : "#c0c0c0",
-            "COLOR_FG_B"         : "#ffffff",
-
-            "COLOR_ACTIVE"       : "#2675b2",
-            "COLOR_INACTIVE"     : "#80808080",
-
-            "COLOR_SIZING"       : "#00c0ff",
-            "COLOR_DLG_HEAD_FG_I": "#ffffff",
-            "COLOR_DLG_HEAD_FG_O": "#202020",
-            "COLOR_DLG_HEAD_BG_I": "#303030",
-            "COLOR_DLG_HEAD_BG_O": "#808080",
-        }.items():
-            self[key] = self.dict.get(key, default)
         # ---- Border ----
         self["PEN_EDGE_D"] = wx.Pen(self["COLOR_EDGE_D"])
         self["PEN_EDGE_L"] = wx.Pen(self["COLOR_EDGE_L"])
@@ -95,6 +92,9 @@ class Resource(BaseDict):
         self["BRUSH_FG_L"] = wx.Brush(self["COLOR_FG_L"])
         self["BRUSH_FG_B"] = wx.Brush(self["COLOR_FG_B"])
         # ---- Button ----
+        self["BRUSH_SET__D"] = {i: self["BRUSH_BG_D"] for i in ("00", "40", "80", "C0", "FF")}
+        self["BRUSH_SET__L"] = {i: self["BRUSH_BG_L"] for i in ("00", "40", "80", "C0", "FF")}
+        self["BRUSH_SET__B"] = {i: self["BRUSH_BG_B"] for i in ("00", "40", "80", "C0", "FF")}
         self["BRUSH_SET_D"] = self.GetBrushSet(self["COLOR_BG_D"], self["COLOR_ACTIVE"])
         self["BRUSH_SET_L"] = self.GetBrushSet(self["COLOR_BG_L"], self["COLOR_ACTIVE"])
         self["BRUSH_SET_B"] = self.GetBrushSet(self["COLOR_BG_B"], self["COLOR_ACTIVE"])
