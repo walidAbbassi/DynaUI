@@ -132,8 +132,8 @@ class StaticText(wx.StaticText, DynaUIMixin):
 
 # =================================================== Miscellaneous ====================================================
 class StaticBitmap(BaseControl):
-    def __init__(self, parent, pos=wx.DefaultPosition, size=wx.DefaultSize, bitmap=wx.NullBitmap, bg="L"):
-        super().__init__(parent, pos=pos, size=size, bg=bg)
+    def __init__(self, parent, pos=wx.DefaultPosition, size=wx.DefaultSize, bitmap=wx.NullBitmap, font=None, res=None, bg="D", fg="L", edge="L"):
+        super().__init__(parent, pos=pos, size=size, font=font, res=res, bg=bg, fg=fg, edge=edge)
         self.Bind(wx.EVT_SIZE, self.OnSize)
         self.Bind(wx.EVT_MOUSE_EVENTS, self.OnMouse)
         self.NullBitmap = wx.Bitmap(0, 0)
@@ -156,7 +156,18 @@ class StaticBitmap(BaseControl):
     def OnPaint(self, evt):
         dc = wx.BufferedPaintDC(self)
         dc.Clear()
+        w, h = self.GetSize()
         dc.DrawBitmap(self.Bitmap, *self.offset, 1)
+        dc.SetPen(self.R["PEN_EDGE_L"])
+        if self.Edge[0]: dc.DrawLine(0, 0, 0, h)
+        if self.Edge[1]: dc.DrawLine(0, 0, w, 0)
+        if self.Edge[2]: dc.DrawLine(w - 1, 0, w - 1, h)
+        if self.Edge[3]: dc.DrawLine(0, h - 1, w, h - 1)
+        dc.SetPen(self.R["PEN_EDGE_D"])
+        if self.Edge[4]: dc.DrawLine(0, 0, 0, h)
+        if self.Edge[5]: dc.DrawLine(0, 0, w, 0)
+        if self.Edge[6]: dc.DrawLine(w - 1, 0, w - 1, h)
+        if self.Edge[7]: dc.DrawLine(0, h - 1, w, h - 1)
 
     def OnSize(self, evt):
         evt.Skip()

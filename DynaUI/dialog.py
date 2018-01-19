@@ -72,21 +72,21 @@ class BaseMain(BaseControl):
         return head
 
     # -------------------------------------- # Stretch only on X and not by default
-    def AddButton(self, sizer, label="", width=None, height=None, tag="", onClick=None, **kwargs):
+    def AddButton(self, sizer, label="", width=None, height=None, inline=True, tag="", onClick=None, **kwargs):
         width = width or self.BUTTON_WIDTH
         height = height or self.LINE_HEIGHT
         btn = (UI.ToolNormal if "pics" in kwargs else UI.ButtonNormal)(self, size=wx.Size(width, height), tag=tag, func=onClick, **kwargs)
-        self._AddCtrl(sizer, label, btn, width == -1, False, True)
+        self._AddCtrl(sizer, label, btn, width == -1, False, inline)
         return btn
 
-    def AddButtonToggle(self, sizer, label="", width=None, height=None, tags=(), toggle=False, onClick=None, **kwargs):
+    def AddButtonToggle(self, sizer, label="", width=None, height=None, inline=True, tags=(), toggle=False, onClick=None, **kwargs):
         width = width or self.BUTTON_WIDTH
         height = height or self.LINE_HEIGHT
         btn = (UI.ToolToggle if "pics" in kwargs else UI.ButtonToggle)(self, size=wx.Size(width, height), tag=tags[0], tag2=tags[1], func=onClick, toggle=toggle, **kwargs)
-        self._AddCtrl(sizer, label, btn, width == -1, False, True)
+        self._AddCtrl(sizer, label, btn, width == -1, False, inline)
         return btn
 
-    def AddButtonBundle(self, sizer, label="", width=None, height=None, rows=1, choices=(), selected=-1, group=None, onClick=None, **kwargs):
+    def AddButtonBundle(self, sizer, label="", width=None, height=None, inline=True, rows=1, choices=(), selected=-1, group=None, onClick=None, **kwargs):
         width = width or self.BUTTON_WIDTH
         height = height or self.LINE_HEIGHT
         ctrl = (UI.ToolBundle if "pics" in kwargs else UI.ButtonBundle)
@@ -102,31 +102,31 @@ class BaseMain(BaseControl):
             btn = ctrl(self, size=wx.Size(width, height), tag=tag, func=onClick, toggle=index == selected, group=group, **kwargs)
             gridSizer.Add(btn, width == -1)
             btns.append(btn)
-        self._AddCtrl(sizer, label, gridSizer, width == -1, False, True)
+        self._AddCtrl(sizer, label, gridSizer, width == -1, False, inline)
         bundled = UI.Bundled(btns)
         bundled.label = gridSizer.label
         return bundled
 
-    def AddPickerValue(self, sizer, label="", width=None, height=None, choices=(), selected=-1, **kwargs):
+    def AddPickerValue(self, sizer, label="", width=None, height=None, inline=True, choices=(), selected=-1, **kwargs):
         width = width or self.BUTTON_WIDTH
         height = height or self.LINE_HEIGHT
         btn = UI.PickerValue(self, size=wx.Size(width, height), choices=choices, selected=selected, **kwargs)
-        self._AddCtrl(sizer, label, btn, width == -1, False, True)
+        self._AddCtrl(sizer, label, btn, width == -1, False, inline)
         return btn
 
     # -------------------------------------- # Stretch only on X and does it by default
-    def AddStaticText(self, sizer, label="", width=-1, height=-1, value="", **kwargs):
+    def AddStaticText(self, sizer, label="", width=-1, height=-1, inline=True, value="", **kwargs):
         height = height or self.LINE_HEIGHT
         text = UI.StaticText(self, value=value, size=wx.Size(width, height), **kwargs)
-        self._AddCtrl(sizer, label, text, width == -1, False, True)
+        self._AddCtrl(sizer, label, text, width == -1, False, inline)
         return text
 
-    def AddLineCtrl(self, sizer, label="", width=-1, height=None, value="", onInput=None, **kwargs):
+    def AddLineCtrl(self, sizer, label="", width=-1, height=None, inline=True, value="", onInput=None, **kwargs):
         height = height or self.LINE_HEIGHT
         text = (UI.TextWithHint if "hint" in kwargs else UI.Text)(self, value=value, size=wx.Size(width, height), **kwargs)
         if onInput:
             text.Bind(wx.EVT_TEXT, onInput)
-        self._AddCtrl(sizer, label, text, width == -1, False, True)
+        self._AddCtrl(sizer, label, text, width == -1, False, inline)
         s = text.GetContainingSizer()
         if s.GetOrientation() == wx.HORIZONTAL:
             s.Detach(text)
