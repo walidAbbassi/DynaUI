@@ -149,6 +149,7 @@ class Scrolled(BaseControl):
         if old != new:
             self.Offset[d] = new
             self.ReDraw()
+            self.OnScroll(self.Offset)
 
     def Scroll(self, d, delta):
         if not delta: return
@@ -235,6 +236,8 @@ class Scrolled(BaseControl):
     def OnMouse(self, evt):  # Re-implemented by subclass
         pass
 
+    def OnScroll(self,offset):
+        pass
 
 # ======================================================================================================================
 class ImageViewer(Scrolled):

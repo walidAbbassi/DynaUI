@@ -633,6 +633,7 @@ class PickerValue(ToolNormal):
         self.AutoLabel = self.Tag == ""
         self.selected = selected
         self.choices = choices
+        self.choosing = None
         if selected != -1 and self.AutoLabel:
             self.SetTag(self.choices[self.selected])
 
@@ -649,7 +650,7 @@ class PickerValue(ToolNormal):
             self.SetSelection(min(self.selected + 1, len(self.choices) - 1))
 
     def OnButton(self):
-        if not self.choices:
+        if not self.choices or self.choosing:
             return
         size = wx.Size(self.GetSize()[0], min(400, (max(self.GetFont().GetPixelSize()[1], Ut.GetFontHeight(self)) + 4) * len(self.choices) + 2))
         d = Di.BaseMiniDialog(invoker=self, pos=self.GetScreenPosition() + (0, self.GetSize()[1] - 1), size=size, main=ListCtrl, data=[(i,) for i in self.choices], width=(-1,), edge=self.Params["EDGE"] or "D")
@@ -657,6 +658,7 @@ class PickerValue(ToolNormal):
         d.Main.Bind(wx.EVT_KILL_FOCUS, lambda evt: (d.Play("FADEOUT"), self.SetFocus()))
         d.Main.OnSelection = lambda: (self.SetSelection(d.Main.GetSelection()), d.Play("FADEOUT"), self.SetFocus())
         d.Play("FADEIN")
+        self.choosing = d
 
     def GetSelection(self):
         return self.selected

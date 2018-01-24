@@ -187,7 +187,6 @@ class StaticBitmap(BaseControl):
             self.lastOffset = self.offset
         elif evtType == wx.wxEVT_MOTION and self.leftDown:
             self.SetOffset(evtPos - self.leftPos + self.lastOffset)
-            self.ReDraw()
         evt.Skip()
 
     def OnCaptureLost(self, evt):
@@ -200,6 +199,7 @@ class StaticBitmap(BaseControl):
         w, h = self.GetSize()
         bw, bh = self.Bitmap.GetSize()
         self.offset = (min(max(x, w - bw), 0), min(max(y, h - bh), 0))
+        self.ReDraw()
 
 
 # =================================================== Miscellaneous ====================================================
