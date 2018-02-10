@@ -177,11 +177,11 @@ class StaticBitmap(BaseControl):
         evtType = evt.GetEventType()
         evtPos = evt.GetPosition()
         if evtType == wx.wxEVT_LEFT_DOWN or evtType == wx.wxEVT_LEFT_DCLICK:
-            if not self.HasCapture(): self.CaptureMouse()
+            self.CaptureMouse()
             self.leftDown = True
             self.leftPos = evtPos
         elif evtType == wx.wxEVT_LEFT_UP:
-            if self.HasCapture(): self.ReleaseMouse()
+            self.ReleaseMouse()
             self.leftDown = False
             self.leftPos = None
             self.lastOffset = self.offset

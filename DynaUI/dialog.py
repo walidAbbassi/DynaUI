@@ -233,11 +233,11 @@ class BaseHead(UI.Button):
         evtType = evt.GetEventType()
         evtPos = evt.GetPosition()
         if evtType == wx.wxEVT_LEFT_DOWN:
-            if not self.HasCapture(): self.CaptureMouse()
+            self.CaptureMouse()
             self.lastMousePos = self.Frame.ClientToScreen(evtPos)
             self.lastFramePos = self.Frame.GetPosition()
         elif evtType == wx.wxEVT_LEFT_UP:
-            if self.HasCapture(): self.ReleaseMouse()
+            self.ReleaseMouse()
             self.lastMousePos = None
             self.lastFramePos = None
         elif evtType == wx.wxEVT_MOTION and self.lastMousePos:
@@ -290,12 +290,12 @@ class BaseGrip(BaseControl):
         evtType = evt.GetEventType()
         evtPos = evt.GetPosition()
         if evtType == wx.wxEVT_LEFT_DOWN:
-            if not self.HasCapture(): self.CaptureMouse()
+            self.CaptureMouse()
             self.leftDown = True
             self.lastMousePos = self.ClientToScreen(evtPos)
             self.lastFrameSize = self.Frame.GetSize()
         elif evtType == wx.wxEVT_LEFT_UP:
-            if self.HasCapture(): self.ReleaseMouse()
+            self.ReleaseMouse()
             if self.sizeRect:
                 self.Frame.SetSize(self.sizeRect.GetSize())
                 self.Frame.Refresh()

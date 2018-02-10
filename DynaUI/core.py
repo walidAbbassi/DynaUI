@@ -166,6 +166,15 @@ class BaseControl(wx.Control):
             self.Refresh()
             self._needReDraw = False
 
+    # Make capturing/releasing mouse easier
+    def CaptureMouse(self):
+        if not self.HasCapture():
+            super().CaptureMouse()
+
+    def ReleaseMouse(self):
+        if self.HasCapture():
+            super().ReleaseMouse()
+
 
 # ==================================================== DynaUI Mixin ====================================================
 class DynaUIMixin(object):

@@ -59,11 +59,11 @@ class Button(BaseControl):
         evtType = evt.GetEventType()
         evtPos = evt.GetPosition()
         if evtType == wx.wxEVT_LEFT_DOWN or evtType == wx.wxEVT_LEFT_DCLICK:
-            if not self.HasCapture(): self.CaptureMouse()
+            self.CaptureMouse()
             self.SetState(BTN_STATE_CLICK)
             self.leftDown = True
         elif evtType == wx.wxEVT_LEFT_UP:
-            if self.HasCapture(): self.ReleaseMouse()
+            self.ReleaseMouse()
             if self.leftDown:
                 self.OnClick()
                 self.leftDown = False
