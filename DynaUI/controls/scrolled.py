@@ -81,8 +81,8 @@ class ScrollBar(object):
 
 class Scrolled(BaseControl):
     def __init__(self, parent, pos=wx.DefaultPosition, size=wx.DefaultSize, style=0,
-                 font=None, res=None, bg="L", fg="L", edge="L", async=False, fpsLimit=120):
-        super().__init__(parent, pos=pos, size=size, style=style | wx.BORDER_NONE | wx.WANTS_CHARS, font=font, res=res, bg=bg, fg=fg, edge=edge, async=async, fpsLimit=fpsLimit)
+                 font=None, res=None, bg="L", fg="L", edge="L", sync=True, fpsLimit=120):
+        super().__init__(parent, pos=pos, size=size, style=style | wx.BORDER_NONE | wx.WANTS_CHARS, font=font, res=res, bg=bg, fg=fg, edge=edge, sync=sync, fpsLimit=fpsLimit)
         self.Unbind(wx.EVT_PAINT)
         self.Bind(wx.EVT_PAINT, self.DoPaint)
         self.Bind(wx.EVT_SIZE, self.SetWindowSize)

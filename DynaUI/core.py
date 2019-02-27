@@ -20,7 +20,7 @@ MAPPING_EDGE = {
 # ======================================================== Base ========================================================
 class BaseControl(wx.Control):
     def __init__(self, parent, pos=wx.DefaultPosition, size=wx.DefaultSize, style=0,
-                 font=None, res=None, bg="L", fg="L", edge=None, async=False, fpsLimit=0):
+                 font=None, res=None, bg="L", fg="L", edge=None, sync=True, fpsLimit=0):
         super().__init__(parent, pos=pos, size=size, style=style | wx.BORDER_NONE)
         self.R = parent.R
         self.S = parent.S
@@ -28,7 +28,7 @@ class BaseControl(wx.Control):
         self.Timers = {}
         self.Animations = {}
         self.Params = {"FONT" : None, "RES": None, "BG": None, "FG": None, "EDGE": None,
-                       "ASYNC": async, "FPS_LIMIT": fpsLimit, "Interval": None}
+                       "ASYNC": not sync, "FPS_LIMIT": fpsLimit, "Interval": None}
         self.SetFONT(font)
         self.SetRES(res)
         self.SetBG(bg)

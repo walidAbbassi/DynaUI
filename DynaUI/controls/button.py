@@ -34,8 +34,8 @@ BTN_CHANGE_CLICK_HOVER = BTN_STATE_HOVER | BTN_STATE_CLICK | BTN_CHANGE_REVERSE
 class Button(BaseControl):
     def __init__(self, parent, pos=wx.DefaultPosition, size=wx.DefaultSize, style=0,
                  tag=None, pic=None, func=None,
-                 font=None, res="D", bg="D", fg="L", edge="L", async=False, fpsLimit=0):
-        super().__init__(parent=parent, pos=pos, size=size, style=style, font=font, res=res, bg=bg, fg=fg, edge=edge, async=async, fpsLimit=fpsLimit)
+                 font=None, res="D", bg="D", fg="L", edge="L", sync=True, fpsLimit=0):
+        super().__init__(parent=parent, pos=pos, size=size, style=style, font=font, res=res, bg=bg, fg=fg, edge=edge, sync=sync, fpsLimit=fpsLimit)
         self.Bind(wx.EVT_SIZE, self.OnSize)
         self.Bind(wx.EVT_MOUSE_EVENTS, self.OnMouse)
         self.Func = func
@@ -350,16 +350,16 @@ ButtonNormal = Button
 class ButtonToggle(ButtonMixinToggle, Button):
     def __init__(self, parent, pos=wx.DefaultPosition, size=wx.DefaultSize, style=0,
                  toggle=False, tag=None, pic=None, tag2=None, pic2=None, func=None,
-                 font=None, res="D", bg="D", fg="L", edge="L", async=False, fpsLimit=0):
-        Button.__init__(self, parent=parent, pos=pos, size=size, style=style, tag=tag, pic=pic, func=func, font=font, res=res, bg=bg, fg=fg, edge=edge, async=async, fpsLimit=fpsLimit)
+                 font=None, res="D", bg="D", fg="L", edge="L", sync=True, fpsLimit=0):
+        Button.__init__(self, parent=parent, pos=pos, size=size, style=style, tag=tag, pic=pic, func=func, font=font, res=res, bg=bg, fg=fg, edge=edge, sync=sync, fpsLimit=fpsLimit)
         ButtonMixinToggle.__init__(self, toggle, tag2, pic2)
 
 
 class ButtonBundle(ButtonMixinBundle, Button):
     def __init__(self, parent, pos=wx.DefaultPosition, size=wx.DefaultSize, style=0,
                  toggle=False, group="", tag=None, pic=None, func=None,
-                 font=None, res="D", bg="D", fg="L", edge="L", async=False, fpsLimit=0):
-        Button.__init__(self, parent=parent, pos=pos, size=size, style=style, tag=tag, pic=pic, func=func, font=font, res=res, bg=bg, fg=fg, edge=edge, async=async, fpsLimit=fpsLimit)
+                 font=None, res="D", bg="D", fg="L", edge="L", sync=True, fpsLimit=0):
+        Button.__init__(self, parent=parent, pos=pos, size=size, style=style, tag=tag, pic=pic, func=func, font=font, res=res, bg=bg, fg=fg, edge=edge, sync=sync, fpsLimit=fpsLimit)
         ButtonMixinBundle.__init__(self, toggle, group)
 
 
@@ -388,12 +388,12 @@ ButtonTypes = {"N": ButtonNormal, "T": ButtonToggle, "B": ButtonBundle}
 class ToolNormal(Button):
     def __init__(self, parent, pos=wx.DefaultPosition, size=wx.DefaultSize, style=0,
                  pics=(), tag=None, func=None, showTag=False,
-                 font=None, res="D", bg="D", fg="L", edge=None, async=False, fpsLimit=0):
+                 font=None, res="D", bg="D", fg="L", edge=None, sync=True, fpsLimit=0):
         if isinstance(pics[0], (tuple, list)):
             pics, *other = pics
         else:
             other = ()
-        super().__init__(parent=parent, pos=pos, size=size, style=style, tag=tag, pic=(pics[0], *other), func=func, font=font, res=res, bg=bg, fg=fg, edge=edge, async=async, fpsLimit=fpsLimit)
+        super().__init__(parent=parent, pos=pos, size=size, style=style, tag=tag, pic=(pics[0], *other), func=func, font=font, res=res, bg=bg, fg=fg, edge=edge, sync=sync, fpsLimit=fpsLimit)
         self.Pics = pics
         self.NewAnimation("ENTER", 25, self.SetResource, ((0, "40"), (1, "80"), (2, "C0"), (3, "FF")), False)
         self.NewAnimation("LEAVE", 25, self.SetResource, ((2, "80"), (1, "80"), (0, "00")), False)
@@ -408,8 +408,8 @@ class ToolNormal(Button):
 class ToolToggle(ButtonMixinToggle, ToolNormal):
     def __init__(self, parent, pos=wx.DefaultPosition, size=wx.DefaultSize, style=0,
                  toggle=False, pics=(), tag=None, tag2=None, func=None, showTag=False,
-                 font=None, res="D", bg="D", fg="L", edge=None, async=False, fpsLimit=0):
-        ToolNormal.__init__(self, parent=parent, pos=pos, size=size, style=style, pics=pics, tag=tag, func=func, showTag=showTag, font=font, res=res, bg=bg, fg=fg, edge=edge, async=async, fpsLimit=fpsLimit)
+                 font=None, res="D", bg="D", fg="L", edge=None, sync=True, fpsLimit=0):
+        ToolNormal.__init__(self, parent=parent, pos=pos, size=size, style=style, pics=pics, tag=tag, func=func, showTag=showTag, font=font, res=res, bg=bg, fg=fg, edge=edge, sync=sync, fpsLimit=fpsLimit)
         ButtonMixinToggle.__init__(self, toggle, tag2, pic2=None)
         if self.Toggle:
             self.Pic = self.Pics[3]
@@ -423,8 +423,8 @@ class ToolToggle(ButtonMixinToggle, ToolNormal):
 class ToolBundle(ButtonMixinBundle, ToolNormal):
     def __init__(self, parent, pos=wx.DefaultPosition, size=wx.DefaultSize, style=0,
                  toggle=False, group="", pics=(), tag=None, func=None, showTag=False,
-                 font=None, res="D", bg="D", fg="L", edge=None, async=False, fpsLimit=0):
-        ToolNormal.__init__(self, parent=parent, pos=pos, size=size, style=style, pics=pics, tag=tag, func=func, showTag=showTag, font=font, res=res, bg=bg, fg=fg, edge=edge, async=async, fpsLimit=fpsLimit)
+                 font=None, res="D", bg="D", fg="L", edge=None, sync=True, fpsLimit=0):
+        ToolNormal.__init__(self, parent=parent, pos=pos, size=size, style=style, pics=pics, tag=tag, func=func, showTag=showTag, font=font, res=res, bg=bg, fg=fg, edge=edge, sync=sync, fpsLimit=fpsLimit)
         ButtonMixinBundle.__init__(self, toggle, group)
         if self.Toggle:
             self.Pic = self.Pics[3]

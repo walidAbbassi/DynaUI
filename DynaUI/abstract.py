@@ -41,13 +41,14 @@ class BaseDict(object):
 
     def Load(self, filename):
         try:
-            if not os.path.exists(filename):
+            if os.path.exists(filename):
+                with open(filename, "r", encoding="utf-8") as f:
+                    for key, value in json.load(f).items():
+                        if key in self.dict:
+                            self.dict[key] = value
+            else:
                 with open(filename, "wb") as f:
                     f.write(b"\x7b\x7d")
-            with open(filename, "r", encoding="utf-8") as f:
-                for key, value in json.load(f).items():
-                    if key in self.dict:
-                        self.dict[key] = value
             self.filename = filename
             self.ok = True
         except Exception:

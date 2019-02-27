@@ -12,9 +12,9 @@ __all__ = ["Tool", "Info"]
 class Tool(BaseControl):
     def __init__(self, parent, pos=wx.DefaultPosition, size=wx.DefaultSize, style=0,
                  orientation=wx.HORIZONTAL, itemSize=wx.Size(32, 32), itemSpace=1,
-                 font=None, res=None, bg="D", fg="L", edge="V", async=False, fpsLimit=0):
+                 font=None, res=None, bg="D", fg="L", edge="V", sync=True, fpsLimit=0):
         size = size or (itemSize[0] + max(itemSpace, 1) * 2, itemSize[1] + max(itemSpace, 1) * 2)
-        super().__init__(parent=parent, pos=pos, size=size, style=style, font=font, res=res, bg=bg, fg=fg, edge=edge, async=async, fpsLimit=fpsLimit)
+        super().__init__(parent=parent, pos=pos, size=size, style=style, font=font, res=res, bg=bg, fg=fg, edge=edge, sync=sync, fpsLimit=fpsLimit)
         sizer = wx.BoxSizer(orientation)
         sizer.Add(1, 1)
         self.SetSizer(sizer)
@@ -78,8 +78,8 @@ class Tool(BaseControl):
 class Info(BaseControl):
     def __init__(self, parent, pos=wx.DefaultPosition, size=wx.Size(24, 24), style=0,
                  orientation=wx.HORIZONTAL, main=True,
-                 font=None, res=None, bg="D", fg="L", edge="V", async=False, fpsLimit=0):
-        super().__init__(parent=parent, pos=pos, size=size, style=style, font=font, res=res, bg=bg, fg=fg, edge=edge, async=async, fpsLimit=fpsLimit)
+                 font=None, res=None, bg="D", fg="L", edge="V", sync=True, fpsLimit=0):
+        super().__init__(parent=parent, pos=pos, size=size, style=style, font=font, res=res, bg=bg, fg=fg, edge=edge, sync=sync, fpsLimit=fpsLimit)
         self.SetSizer(wx.BoxSizer(orientation))
         self.SizerFlags1 = wx.SizerFlags().Expand().Border(wx.ALL, 1)
         self.SizerFlags2 = wx.SizerFlags().Center().Border(wx.ALL, 1)
