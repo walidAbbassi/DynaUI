@@ -136,7 +136,7 @@ class StaticBitmap(BaseControl):
         super().__init__(parent, pos=pos, size=size, font=font, res=res, bg=bg, fg=fg, edge=edge)
         self.Bind(wx.EVT_SIZE, self.OnSize)
         self.Bind(wx.EVT_MOUSE_EVENTS, self.OnMouse)
-        self.NullBitmap = wx.Bitmap(0, 0)
+        self.NullBitmap = wx.Bitmap(1, 1)
         self.Bitmap = bitmap or self.NullBitmap
         if size is wx.DefaultSize:
             self.SetInitialSize(self.Bitmap.GetSize())

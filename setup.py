@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
     name="DynaUI",
-    version="1.1.4",
+    version="1.1.5",
     description="A framework to increase the scalability and flexibility of wxPython",
     url="https://github.com/yadizhou/DynaUI",
     author="Yadi Zhou",
@@ -21,6 +21,8 @@ setup(
         "Topic :: Software Development :: User Interfaces",
         "Programming Language :: Python :: 3.5",
         "Programming Language :: Python :: 3.6",
+        "Programming Language :: Python :: 3.7",
+        "Programming Language :: Python :: 3.8",
     ],
     keywords="GUI UI wxPython user-interface",
     packages=["DynaUI", "DynaUI.controls", "DynaUI.demo"],
